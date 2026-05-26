@@ -1,0 +1,2632 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O!Business — Налоговые сервисы</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: #E8ECF4;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 40px 24px;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.phone-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.phone-col-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6B7280;
+}
+
+/* ── PHONE SHELL ─────────────────────────────────── */
+.phone-shell {
+  width: 375px;
+  height: 780px;
+  background: #fff;
+  border-radius: 44px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 6px solid #1C1C1E;
+}
+.notch {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 126px; height: 30px;
+  background: #1C1C1E;
+  border-radius: 0 0 18px 18px;
+  z-index: 100;
+}
+
+/* ── STATUS BAR ─────────────────────────────────── */
+.status-bar {
+  background: #0B2D6B;
+  padding: 10px 24px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.status-bar .time { color:#fff; font-size:13px; font-weight:600; padding-left:40px; }
+.status-bar .icons { color:#fff; font-size:11px; display:flex; align-items:center; gap:6px; }
+
+/* ── APP HEADER ─────────────────────────────────── */
+.app-header {
+  background: #0B2D6B;
+  padding: 8px 20px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+.back-btn {
+  color:#fff; font-size:22px; cursor:pointer;
+  width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+  border-radius:50%; transition:background 0.15s; flex-shrink:0; border:none; background:transparent;
+}
+.back-btn:hover { background: rgba(255,255,255,0.12); }
+.h-title { color:#fff; font-size:16px; font-weight:700; flex:1; }
+.h-badge {
+  background:#DC2626; color:#fff; font-size:10px; font-weight:700;
+  padding:2px 7px; border-radius:10px;
+}
+
+/* ── SCREEN CONTAINER ────────────────────────────── */
+.screen-container {
+  flex:1; position:relative; overflow:hidden; background:#F5F6FA;
+}
+.screen {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  transform:translateX(100%);
+  transition:transform 0.32s cubic-bezier(0.4,0,0.2,1);
+  will-change:transform;
+  pointer-events:none;
+}
+.screen.active { transform:translateX(0); pointer-events:auto; }
+.screen.exit   { transform:translateX(-38%); }
+
+.screen-body {
+  flex:1; overflow-y:auto; padding:16px;
+  display:flex; flex-direction:column; gap:12px;
+  background:#F5F6FA;
+  -webkit-overflow-scrolling:touch;
+}
+.screen-body::-webkit-scrollbar { width:0; }
+
+/* ── SKELETON ───────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position:-600px 0; }
+  100% { background-position: 600px 0; }
+}
+.skeleton {
+  background:linear-gradient(90deg,#E5E7EB 25%,#F3F4F6 50%,#E5E7EB 75%);
+  background-size:1200px 100%;
+  animation:shimmer 1.4s infinite;
+  border-radius:6px;
+}
+.sk-h  { height:12px; }
+.sk-full{ width:100%; }
+.sk-80 { width:80%; }
+.sk-55 { width:55%; }
+.sk-btn{ height:40px; border-radius:10px; margin-top:8px; }
+.sk-ttl{ height:16px; width:60%; margin-bottom:14px; }
+.sk-card{
+  background:#fff; border-radius:16px; padding:16px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  display:flex; flex-direction:column; gap:8px;
+}
+
+/* ── DEBT CARD ──────────────────────────────────── */
+.debt-card {
+  background:#fff; border-radius:16px; overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,0.07);
+  cursor:pointer; transition:transform 0.15s, box-shadow 0.15s;
+}
+.debt-card:active { transform:scale(0.985); box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+.debt-card-hdr {
+  background:linear-gradient(135deg,#EEF2FF,#E0E7FF);
+  padding:12px 16px; display:flex; align-items:center; gap:8px;
+  border-bottom:1px solid #E5E7EB;
+}
+.debt-card-hdr .rayon { font-size:13px; font-weight:700; color:#0B2D6B; flex:1; }
+.count-badge {
+  background:#DC2626; color:#fff; font-size:10px; font-weight:700;
+  padding:2px 8px; border-radius:10px;
+}
+.debt-item { padding:13px 16px; border-bottom:1px solid #F3F4F6; }
+.debt-item:last-of-type { border-bottom:none; }
+.debt-item .tax-name { font-size:13px; font-weight:600; color:#1A1A2E; margin-bottom:3px; }
+.debt-item .kbk      { font-size:11px; color:#9CA3AF; margin-bottom:8px; }
+.debt-item .amount-row{ display:flex; justify-content:space-between; align-items:center; }
+.debt-item .amount-label{ font-size:12px; color:#6B7280; }
+.debt-item .amount  { font-size:17px; font-weight:800; color:#DC2626; }
+.pay-btn-row { padding:12px 16px; }
+.pay-btn {
+  width:100%; padding:12px; background:#0B2D6B; color:#fff;
+  border:none; border-radius:12px; font-size:14px; font-weight:600;
+  cursor:pointer; transition:background 0.15s, transform 0.1s;
+}
+.pay-btn:hover  { background:#0D3580; }
+.pay-btn:active { transform:scale(0.97); }
+.pay-btn.ghost { background:#F9FAFB; color:#6B7280; border:1px solid #E5E7EB; font-weight:500; }
+.pay-btn.ghost:hover { background:#F3F4F6; }
+.pay-btn.danger { background:#DC2626; }
+.pay-btn.danger:hover { background:#B91C1C; }
+
+/* ── DEBT CARD STATUS BADGE ─────────────────────── */
+.dc-status { font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; white-space:nowrap; flex-shrink:0; }
+.dc-status.st0 { background:#F3F4F6; color:#6B7280; }
+.dc-status.st1 { background:#FEF3C7; color:#92400E; }
+.dc-status.st2 { background:#FED7AA; color:#9A3412; }
+.dc-status.st3 { background:#D1FAE5; color:#065F46; }
+.dc-status.st4 { background:#DBEAFE; color:#1E40AF; }
+.dc-status.st5 { background:#FEE2E2; color:#991B1B; }
+.dc-status.st6 { background:#FEE2E2; color:#9A3412; }
+.dc-status.st7 { background:#FEF3C7; color:#78350F; }
+.dc-status.st8 { background:#DBEAFE; color:#1D4ED8; }
+
+/* ── SECTION HEADER ─────────────────────────────── */
+.debts-section-hdr { display:flex; align-items:center; gap:8px; padding:2px 0 4px; }
+.debts-section-hdr .dsh-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#9CA3AF; flex:1; }
+.debts-section-hdr .dsh-count { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; }
+.dsh-count.active-cnt  { background:#DC2626; color:#fff; }
+.dsh-count.history-cnt { background:#D1FAE5; color:#065F46; }
+
+/* ── NOTICE ON CARD ─────────────────────────────── */
+.dc-notice { font-size:11px; margin-top:8px; padding:7px 10px; border-radius:8px; line-height:1.45; }
+.dc-notice.info { background:#F0F9FF; color:#0369A1; }
+.dc-notice.warn { background:#FFFBEB; color:#78350F; }
+.dc-notice.err  { background:#FEF2F2; color:#991B1B; }
+
+/* ── SPLIT AMOUNT (partial/overpay on card) ─────── */
+.dc-split { display:flex; gap:8px; margin-top:8px; }
+.dc-split-cell { flex:1; border-radius:8px; padding:8px 10px; }
+.dc-split-cell .dsc-lbl { font-size:10px; font-weight:500; margin-bottom:3px; }
+.dc-split-cell .dsc-val { font-size:14px; font-weight:800; }
+
+/* ── CARD META (КБК, период, ИНН) ──────────────── */
+.dc-meta { display:flex; flex-direction:column; gap:5px; margin:8px 0 6px; }
+.dc-meta-row { display:flex; align-items:center; gap:6px; }
+.dc-meta-lbl { font-size:10px; color:#9CA3AF; width:40px; flex-shrink:0; font-weight:500; }
+.dc-meta-txt { font-size:11px; color:#6B7280; }
+.dc-total-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding:7px 10px; background:#F9FAFB; border-radius:8px; }
+.dc-total-lbl { font-size:11px; color:#6B7280; }
+.dc-total-val { font-size:13px; font-weight:700; color:#374151; }
+
+/* ── BOTTOM SHEET ───────────────────────────────── */
+.overlay {
+  position:absolute; inset:0; background:rgba(0,0,0,0);
+  z-index:50; pointer-events:none;
+  transition:background 0.3s; border-radius:38px;
+}
+.overlay.show { background:rgba(0,0,0,0.5); pointer-events:all; }
+.bottom-sheet {
+  position:absolute; bottom:0; left:0; right:0;
+  background:#fff; border-radius:24px 24px 0 0;
+  z-index:51; transform:translateY(100%);
+  transition:transform 0.36s cubic-bezier(0.4,0,0.2,1);
+  max-height:88%; display:flex; flex-direction:column;
+}
+.bottom-sheet.show { transform:translateY(0); }
+.bs-handle {
+  width:40px; height:4px; background:#E5E7EB;
+  border-radius:2px; margin:12px auto 0; flex-shrink:0;
+}
+.bs-header { padding:16px 20px 12px; border-bottom:1px solid #F3F4F6; flex-shrink:0; }
+.bs-title  { font-size:18px; font-weight:800; color:#1A1A2E; }
+.bs-rayon  { font-size:12px; color:#6B7280; margin-top:2px; display:flex; align-items:center; gap:4px; }
+.bs-body   { overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:12px; flex:1; }
+.bs-body::-webkit-scrollbar { width:0; }
+.bs-tax-block {
+  background:#F8F9FF; border:1px solid #E0E7FF;
+  border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:8px;
+}
+.bs-row { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+.bs-label  { font-size:12px; color:#6B7280; flex-shrink:0; }
+.bs-value  { font-size:12px; font-weight:600; color:#1A1A2E; text-align:right; }
+.bs-amount-big { font-size:22px; font-weight:800; color:#DC2626; }
+.bs-divider{ height:1px; background:#E5E7EB; }
+.kbk-tag {
+  display:inline-block; background:#EEF2FF; color:#0B2D6B;
+  font-size:11px; font-weight:700; padding:3px 8px;
+  border-radius:6px; font-family:monospace; letter-spacing:0.5px;
+}
+.bs-footer {
+  padding:16px 20px; border-top:1px solid #F3F4F6;
+  flex-shrink:0; display:flex; flex-direction:column; gap:8px;
+}
+
+/* ── FORM FIELDS ────────────────────────────────── */
+.field-group { display:flex; flex-direction:column; gap:4px; }
+.field-label { font-size:11px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:0.6px; }
+.field-val {
+  background:#fff; border:1.5px solid #E5E7EB;
+  border-radius:12px; padding:12px 14px; font-size:14px; color:#1A1A2E;
+  display:flex; justify-content:space-between; align-items:center;
+  cursor:pointer; transition:border-color 0.15s; min-height:48px;
+}
+.field-val:hover   { border-color:#A5B4FC; }
+.field-val.readonly{ background:#F7F8FA; color:#9CA3AF; cursor:default; border-color:#F0F0F0; }
+.field-val.readonly:hover { border-color:#F0F0F0; }
+.field-val.filled  { border-color:#0B2D6B; background:#F0F4FF; }
+.field-val.err     { border-color:#DC2626; background:#FEF2F2; }
+.field-arrow { color:#9CA3AF; font-size:12px; flex-shrink:0; }
+.field-error { font-size:12px; color:#DC2626; }
+
+/* amount input */
+.amount-input {
+  background:#fff; border:1.5px solid #E5E7EB; border-radius:12px;
+  padding:12px 14px; font-size:18px; font-weight:700; color:#1A1A2E;
+  width:100%; outline:none; transition:border-color 0.15s;
+  font-family:inherit;
+}
+.amount-input:focus { border-color:#0B2D6B; }
+.amount-input::placeholder { color:#D1D5DB; font-size:14px; font-weight:400; }
+.amount-input.err { border-color:#DC2626; background:#FEF2F2; }
+
+/* ── DROPDOWN ───────────────────────────────────── */
+.dropdown-wrap { position:relative; }
+.dropdown-list {
+  background:#fff; border:1.5px solid #0B2D6B;
+  border-radius:12px; overflow:hidden;
+  box-shadow:0 8px 24px rgba(0,0,0,0.12);
+  margin-top:4px; display:none; position:relative; z-index:20;
+}
+.dropdown-list.open { display:block; }
+.dd-item {
+  padding:11px 14px; font-size:13px; color:#1A1A2E;
+  border-bottom:1px solid #F3F4F6;
+  display:flex; align-items:center; gap:8px;
+  cursor:pointer; transition:background 0.12s;
+}
+.dd-item:last-child { border-bottom:none; }
+.dd-item:hover  { background:#F0F4FF; }
+.dd-item.active { background:#EEF2FF; color:#0B2D6B; font-weight:600; }
+.dd-item .dd-check { color:#0B2D6B; width:16px; flex-shrink:0; }
+.dd-sub { font-size:11px; color:#9CA3AF; margin-top:1px; }
+
+/* ── BUTTONS ─────────────────────────────────────── */
+.btn-primary {
+  width:100%; padding:14px; background:#0B2D6B; color:#fff;
+  border:none; border-radius:14px; font-size:15px; font-weight:700;
+  cursor:pointer; transition:background 0.15s, transform 0.1s;
+  letter-spacing:0.2px; font-family:inherit;
+}
+.btn-primary:hover  { background:#0D3580; }
+.btn-primary:active { transform:scale(0.97); }
+.btn-primary.disabled, .btn-primary:disabled {
+  background:#CBD5E1; color:#94A3B8; cursor:not-allowed; pointer-events:none;
+}
+.btn-secondary {
+  width:100%; padding:13px; background:transparent;
+  color:#0B2D6B; border:1.5px solid #0B2D6B;
+  border-radius:14px; font-size:15px; font-weight:600;
+  cursor:pointer; transition:background 0.15s; font-family:inherit;
+}
+.btn-secondary:hover { background:#F0F4FF; }
+.btn-text-link {
+  width:100%; padding:10px; background:transparent; color:#6B7280;
+  border:none; font-size:14px; font-weight:500;
+  cursor:pointer; text-align:center; font-family:inherit;
+}
+
+/* ── SERVICE CARDS (home screen) ─────────────────── */
+.home-body {
+  flex:1; overflow-y:auto; background:#F5F6FA; padding:16px;
+  display:flex; flex-direction:column; gap:12px;
+}
+.service-card {
+  background:#fff; border-radius:16px; padding:18px 16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.07);
+  cursor:pointer; display:flex; align-items:center; gap:14px;
+  transition:transform 0.15s, box-shadow 0.15s;
+  border:1.5px solid transparent;
+}
+.service-card:hover  { border-color:#A5B4FC; box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+.service-card:active { transform:scale(0.985); }
+.service-icon {
+  width:48px; height:48px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center; font-size:22px;
+  flex-shrink:0;
+}
+.service-icon.red { background:#FEF2F2; }
+.service-icon.blue { background:#EEF2FF; }
+.service-info { flex:1; }
+.service-name { font-size:14px; font-weight:700; color:#1A1A2E; }
+.service-desc { font-size:12px; color:#6B7280; margin-top:3px; line-height:1.4; }
+.service-arrow { color:#D1D5DB; font-size:18px; }
+
+.home-section-title {
+  font-size:11px; font-weight:700; color:#9CA3AF;
+  text-transform:uppercase; letter-spacing:0.8px;
+}
+
+/* ── ACCOUNT CARD ───────────────────────────────── */
+.account-card {
+  background:#fff; border:1.5px solid #E5E7EB;
+  border-radius:14px; padding:14px 16px;
+  cursor:pointer; display:flex; align-items:center; gap:12px;
+  transition:border-color 0.15s, background 0.15s;
+}
+.account-card:hover { border-color:#A5B4FC; }
+.account-card.sel   { border-color:#0B2D6B; background:#EEF2FF; }
+.account-card.err   { border-color:#DC2626; background:#FEF2F2; }
+.radio-dot {
+  width:20px; height:20px; border-radius:50%;
+  border:2px solid #CBD5E1; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:border-color 0.15s;
+}
+.radio-dot.on  { border-color:#0B2D6B; }
+.radio-dot.on::after { content:''; width:8px; height:8px; border-radius:50%; background:#0B2D6B; display:block; }
+.radio-dot.err { border-color:#DC2626; }
+.acc-name { font-size:14px; font-weight:600; color:#1A1A2E; }
+.acc-num  { font-size:12px; color:#9CA3AF; margin-top:1px; }
+.acc-bal  { font-size:13px; font-weight:700; color:#10B981; margin-top:3px; }
+.acc-bal.low { color:#DC2626; }
+
+/* ── INFO BLOCKS ─────────────────────────────────── */
+.info-block {
+  background:#fff; border-radius:14px; padding:4px 16px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+}
+.info-row {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  padding:11px 0; border-bottom:1px solid #F3F4F6; gap:10px;
+}
+.info-row:last-child { border-bottom:none; }
+.info-lbl { font-size:13px; color:#6B7280; flex-shrink:0; }
+.info-val { font-size:13px; font-weight:600; color:#1A1A2E; text-align:right; max-width:55%; }
+.info-val.big   { font-size:16px; color:#0B2D6B; }
+.info-val.green { color:#10B981; }
+
+.amount-banner {
+  background:linear-gradient(135deg,#0B2D6B,#1E40AF);
+  border-radius:16px; padding:20px; text-align:center; color:#fff;
+}
+.amount-banner .aml { font-size:12px; opacity:0.7; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px; }
+.amount-banner .amv { font-size:32px; font-weight:800; }
+
+.code-card {
+  background:#F0F4FF; border:1.5px dashed #93C5FD;
+  border-radius:12px; padding:12px 16px; text-align:center;
+}
+.code-card .cl { font-size:10px; color:#6B7280; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px; }
+.code-card .cv { font-size:15px; font-weight:700; color:#0B2D6B; font-family:monospace; letter-spacing:1.5px; }
+
+.confirm-top {
+  background:linear-gradient(135deg,#0B2D6B,#1E40AF);
+  padding:24px 20px 20px; text-align:center; flex-shrink:0;
+}
+.confirm-top .ct-lbl { font-size:12px; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:1px; }
+.confirm-top .ct-amt { font-size:34px; font-weight:800; color:#fff; }
+.confirm-top .ct-sub { font-size:13px; color:rgba(255,255,255,0.75); margin-top:4px; }
+
+/* ── STEP BAR ───────────────────────────────────── */
+.step-bar { background:#fff; border-bottom:1px solid #F3F4F6; padding:10px 20px 12px; flex-shrink:0; }
+.step-dots { display:flex; gap:6px; align-items:center; margin-bottom:4px; }
+.step-dot { width:8px; height:8px; border-radius:50%; background:#E5E7EB; transition:all 0.3s; }
+.step-dot.act  { width:24px; border-radius:4px; background:#0B2D6B; }
+.step-dot.done { background:#10B981; }
+.step-txt { font-size:12px; color:#6B7280; }
+
+/* ── PROCESSING / RESULT ─────────────────────────── */
+@keyframes spin { to { transform:rotate(360deg); } }
+.spinner-wrap {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  flex:1; gap:18px; padding:40px 20px; text-align:center; background:#fff;
+}
+.spinner {
+  width:56px; height:56px; border:5px solid #E5E7EB;
+  border-top-color:#0B2D6B; border-radius:50%; animation:spin 0.9s linear infinite;
+}
+.sp-title { font-size:18px; font-weight:700; color:#1A1A2E; }
+.sp-sub   { font-size:13px; color:#6B7280; line-height:1.6; max-width:220px; }
+
+.result-wrap {
+  display:flex; flex-direction:column; align-items:center;
+  padding:40px 24px 24px; text-align:center; gap:10px;
+  background:#fff; flex:1; overflow-y:auto;
+}
+.result-icon  { font-size:64px; }
+.result-title { font-size:20px; font-weight:800; color:#1A1A2E; margin-top:4px; }
+.result-sub   { font-size:13px; color:#6B7280; line-height:1.5; max-width:240px; }
+.result-details {
+  width:100%; background:#F5F6FA; border-radius:14px; padding:4px 16px; margin:8px 0;
+}
+
+/* ── ALERTS ─────────────────────────────────────── */
+.alert {
+  background:#EFF6FF; border:1px solid #BFDBFE; border-radius:12px;
+  padding:12px 14px; font-size:12px; color:#1E40AF;
+  line-height:1.5; display:flex; gap:8px; align-items:flex-start;
+}
+.alert.warn { background:#FEF3C7; border-color:#FDE68A; color:#92400E; }
+.alert.err  { background:#FEF2F2; border-color:#FCA5A5; color:#991B1B; }
+
+/* ── PAYCODE SCREEN ─────────────────────────────── */
+.paycode-wrap {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  flex:1; gap:0; background:#fff; padding:32px 24px; text-align:center;
+}
+.paycode-steps { display:flex; flex-direction:column; gap:0; width:100%; max-width:300px; }
+.paycode-step {
+  display:flex; align-items:center; gap:14px; padding:14px 0;
+  border-bottom:1px solid #F3F4F6; opacity:0.3; transition:opacity 0.4s;
+}
+.paycode-step:last-child { border-bottom:none; }
+.paycode-step.done  { opacity:1; }
+.paycode-step.active{ opacity:1; }
+.ps-icon {
+  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+}
+.ps-icon.wait  { background:#F3F4F6; }
+.ps-icon.spin  { background:#EEF2FF; }
+.ps-icon.ok    { background:#D1FAE5; }
+.ps-icon .mini-spin {
+  width:16px; height:16px; border:2px solid #C7D2FE; border-top-color:#0B2D6B;
+  border-radius:50%; animation:spin 0.8s linear infinite;
+}
+.ps-text { text-align:left; }
+.ps-title { font-size:13px; font-weight:600; color:#1A1A2E; }
+.ps-sub   { font-size:11px; color:#9CA3AF; margin-top:2px; }
+
+/* paycode result card */
+.paycode-result {
+  background:linear-gradient(135deg,#0B2D6B,#1E40AF);
+  border-radius:18px; padding:20px; text-align:center; width:100%;
+}
+.paycode-result .pr-label { font-size:11px; color:rgba(255,255,255,0.65); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+.paycode-result .pr-code  { font-size:20px; font-weight:800; color:#fff; font-family:monospace; letter-spacing:2px; }
+.paycode-result .pr-sub   { font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; }
+
+/* confirm summary card */
+.conf-summary {
+  background:#F0F4FF; border:1px solid #C7D2FE;
+  border-radius:12px; padding:12px 14px;
+  display:flex; align-items:center; gap:10px;
+}
+.conf-summary .cs-icon { font-size:20px; flex-shrink:0; }
+.conf-summary .cs-text { font-size:12px; color:#1E40AF; font-weight:600; line-height:1.4; }
+
+/* ── STATUS BADGE (result screens) ──────────────── */
+.status-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 12px; border-radius:20px; font-size:11px; font-weight:700;
+  letter-spacing:0.3px; flex-shrink:0;
+}
+.status-badge.ok       { background:#D1FAE5; color:#065F46; }
+.status-badge.partial  { background:#FEF3C7; color:#92400E; }
+.status-badge.overpay  { background:#EEF2FF; color:#1E40AF; }
+.status-badge.overdue  { background:#FEF2F2; color:#991B1B; }
+.status-badge.delayed  { background:#F3F4F6; color:#374151; }
+
+/* ── DEMO CYCLE LABEL ────────────────────────────── */
+.demo-label {
+  font-size:10px; color:#6B7280; background:#F3F4F6;
+  border-radius:8px; padding:5px 12px; text-align:center;
+  margin-top:8px;
+}
+
+/* ── MISC ───────────────────────────────────────── */
+.spacer { flex:1; min-height:12px; }
+.screen-subtitle { font-size:13px; color:#6B7280; line-height:1.5; }
+.section-title { font-size:11px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.8px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  PHONE 1 — Задолженность → Оплата                  -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="phone-col">
+  <div class="phone-col-label">Флоу 1 — Проверка задолженности</div>
+  <div class="phone-shell" id="phone1">
+    <div class="notch"></div>
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons"><span>●●●</span><span>▊</span></div>
+    </div>
+    <div class="app-header" id="p1-mainHeader">
+      <button class="back-btn" onclick="p1GoBack()">‹</button>
+      <span class="h-title" id="p1-headerTitle">Налоговая задолженность</span>
+      <span class="h-badge" id="p1-headerBadge">5</span>
+    </div>
+    <div class="screen-container" id="p1-screens">
+
+      <!-- loading -->
+      <div class="screen active" id="p1-screen-loading">
+        <div class="screen-body">
+          <div class="sk-card"><div class="skeleton sk-h sk-55 sk-ttl"></div><div class="skeleton sk-h sk-full"></div><div class="skeleton sk-h sk-80"></div><div class="skeleton sk-h sk-55"></div><div class="skeleton sk-btn"></div></div>
+          <div class="sk-card"><div class="skeleton sk-h sk-55 sk-ttl"></div><div class="skeleton sk-h sk-full"></div><div class="skeleton sk-h sk-80"></div><div class="skeleton sk-btn"></div></div>
+        </div>
+      </div>
+
+      <!-- debts -->
+      <div class="screen" id="p1-screen-debts">
+        <div class="screen-body">
+          <p class="screen-subtitle">Данные получены от ГНС по вашему ИНН. Нажмите на карточку для деталей.</p>
+
+          <!-- ── АКТИВНЫЕ (статусы 0,1,2,5,6) ──── -->
+          <div class="debts-section-hdr">
+            <span class="dsh-title">Активные задолженности</span>
+            <span class="dsh-count active-cnt">5</span>
+          </div>
+
+          <!-- Статус 0 — Новый -->
+          <div class="debt-card" style="cursor:default">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#F9FAFB,#F3F4F6)">
+              <span>📍</span><span class="rayon">Свердловский район</span>
+              <span class="dc-status st0">● Новый</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Акцизный налог</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10500100</span><span class="dc-meta-txt">Акцизы на товары</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Декабрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="amount-row"><span class="amount-label">Сумма обязательства</span><span class="amount" style="color:#6B7280">1 840.00 ₸</span></div>
+              <div class="dc-notice info">Транзакция создана, ожидает обработки в ГНС. Оплата пока недоступна.</div>
+            </div>
+          </div>
+
+          <!-- Статус 1 — Ожидание оплаты -->
+          <div class="debt-card" style="cursor:default">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#FFFBEB,#FEF3C7)">
+              <span>📍</span><span class="rayon">Ленинский район</span>
+              <span class="dc-status st1">● Ожидание оплаты</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">НДС на импортные товары</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10401000</span><span class="dc-meta-txt">НДС на импорт</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Март–Апрель 2026</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="amount-row"><span class="amount-label">Сумма</span><span class="amount" style="color:#D97706">4 500.00 ₸</span></div>
+              <div class="dc-notice warn">Платёж в обработке — не создавайте повторный платёж</div>
+            </div>
+          </div>
+
+          <!-- Статус 2 — Частично оплачено → функциональный -->
+          <div class="debt-card" id="p1-card-nds" onclick="p1OpenSheet('nds')">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#FFF7ED,#FED7AA)">
+              <span>📍</span><span class="rayon">Октябрьский район</span>
+              <span class="dc-status st2" id="p1-card-status-nds">⚠ Частично оплачено</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Налог на добавленную стоимость</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10400100</span><span class="dc-meta-txt">НДС на товары и услуги</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Декабрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="dc-total-row"><span class="dc-total-lbl">Исходная задолженность</span><span class="dc-total-val" id="p1-card-nds-total">6 317.37 ₸</span></div>
+              <div class="dc-split">
+                <div class="dc-split-cell" style="background:#FEF9C3">
+                  <div class="dsc-lbl" style="color:#92400E">Зачтено</div>
+                  <div class="dsc-val" style="color:#92400E" id="p1-card-nds-paid">4 317.37 ₸</div>
+                </div>
+                <div class="dc-split-cell" style="background:#FEE2E2">
+                  <div class="dsc-lbl" style="color:#991B1B">Остаток долга</div>
+                  <div class="dsc-val" style="color:#991B1B" id="p1-card-nds-remain">2 000.00 ₸</div>
+                </div>
+              </div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn" id="p1-card-nds-btn" onclick="event.stopPropagation();p1OpenSheet('nds')">Доплатить остаток</button></div>
+          </div>
+
+          <!-- Статус 5 — Просрочено → функциональный -->
+          <div class="debt-card" id="p1-card-income" onclick="p1OpenSheet('income')">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#FFF1F2,#FEE2E2)">
+              <span>📍</span><span class="rayon">Первомайский район</span>
+              <span class="dc-status st5" id="p1-card-status-income">❌ Просрочено</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Налог на прибыль организаций</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10100101</span><span class="dc-meta-txt">Налог на прибыль орг.</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Сентябрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="amount-row"><span class="amount-label" id="p1-card-income-amount-label">Сумма долга</span><span class="amount" id="p1-card-income-amount">3 200.00 ₸</span></div>
+              <div class="dc-notice err" id="p1-card-income-notice">⚠ Срок оплаты истёк — возможно начисление пеней</div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn danger" id="p1-card-income-btn" onclick="event.stopPropagation();p1OpenSheet('income')">Оплатить (возможны пени)</button></div>
+          </div>
+
+          <!-- Статус 6 — Частично + задержка → функциональный -->
+          <div class="debt-card" id="p1-card-vatimport" onclick="p1OpenSheet('vatimport')">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#FFF1F2,#FED7AA)">
+              <span>📍</span><span class="rayon">Октябрьский район</span>
+              <span class="dc-status st6" id="p1-card-status-vatimport">⚠ Частично + просрочка</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Подоходный налог с физических лиц</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10100201</span><span class="dc-meta-txt">НДФЛ с физических лиц</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Апрель 2026</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="dc-total-row"><span class="dc-total-lbl">Исходная задолженность</span><span class="dc-total-val" id="p1-card-vatimport-total">2 200.00 ₸</span></div>
+              <div class="dc-split">
+                <div class="dc-split-cell" style="background:#FEF9C3">
+                  <div class="dsc-lbl" style="color:#92400E">Зачтено</div>
+                  <div class="dsc-val" style="color:#92400E" id="p1-card-vatimport-paid">1 500.00 ₸</div>
+                </div>
+                <div class="dc-split-cell" style="background:#FEE2E2">
+                  <div class="dsc-lbl" style="color:#991B1B">Остаток долга</div>
+                  <div class="dsc-val" style="color:#991B1B" id="p1-card-vatimport-remain">700.00 ₸</div>
+                </div>
+              </div>
+              <div class="dc-notice err" id="p1-card-vatimport-notice">⚠ Частичная оплата прошла позже срока — возможны пени</div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn danger" id="p1-card-vatimport-btn" onclick="event.stopPropagation();p1OpenSheet('vatimport')">Доплатить остаток</button></div>
+          </div>
+
+          <!-- ── ИСТОРИЯ (статусы 3,4,7,8) ──── -->
+          <div class="debts-section-hdr" style="margin-top:4px">
+            <span class="dsh-title">История</span>
+            <span class="dsh-count history-cnt">4</span>
+          </div>
+
+          <!-- Статус 3 — Оплачен -->
+          <div class="debt-card" style="cursor:default;opacity:0.88">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7)">
+              <span>📍</span><span class="rayon">Свердловский район</span>
+              <span class="dc-status st3">✓ Оплачен</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Акцизный налог на алкоголь</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10500200</span><span class="dc-meta-txt">Акцизы на алкоголь</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Декабрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="amount-row"><span class="amount-label">Оплачено</span><span class="amount" style="color:#059669">6 317.37 ₸</span></div>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:6px">📅 15.05.2026 · 14:23</div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn ghost">Смотреть квитанцию</button></div>
+          </div>
+
+          <!-- Статус 4 — Переплачено -->
+          <div class="debt-card" style="cursor:default;opacity:0.88">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE)">
+              <span>📍</span><span class="rayon">Свердловский район</span>
+              <span class="dc-status st4">ℹ Переплата</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Социальные отчисления</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">20200100</span><span class="dc-meta-txt">Соцотчисления ИП</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Март 2026</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="dc-total-row"><span class="dc-total-lbl">Сумма обязательства</span><span class="dc-total-val">5 000.00 ₸</span></div>
+              <div class="dc-split">
+                <div class="dc-split-cell" style="background:#EFF6FF">
+                  <div class="dsc-lbl" style="color:#1E40AF">Оплачено</div>
+                  <div class="dsc-val" style="color:#1E40AF">5 200.00 ₸</div>
+                </div>
+                <div class="dc-split-cell" style="background:#D1FAE5">
+                  <div class="dsc-lbl" style="color:#065F46">Переплата</div>
+                  <div class="dsc-val" style="color:#065F46">200.00 ₸</div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:6px">📅 20.05.2026 · Переплата будет зачтена ГНС</div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn ghost">Смотреть квитанцию</button></div>
+          </div>
+
+          <!-- Статус 7 — Оплачено с задержкой -->
+          <div class="debt-card" style="cursor:default;opacity:0.88">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#FFFBEB,#FEF3C7)">
+              <span>📍</span><span class="rayon">Ленинский район</span>
+              <span class="dc-status st7">⏱ Оплачено с задержкой</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Налог с продаж</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10200100</span><span class="dc-meta-txt">Налог с продаж</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Октябрь–Декабрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="amount-row"><span class="amount-label">Оплачено</span><span class="amount" style="color:#D97706">3 100.00 ₸</span></div>
+              <div class="dc-notice warn">Платёж прошёл позже срока — уточните пени в ГНС</div>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:5px">📅 18.05.2026</div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn ghost">Смотреть квитанцию</button></div>
+          </div>
+
+          <!-- Статус 8 — Переплата с задержкой -->
+          <div class="debt-card" style="cursor:default;opacity:0.88">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE)">
+              <span>📍</span><span class="rayon">Первомайский район</span>
+              <span class="dc-status st8">ℹ Переплата с задержкой</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Налог на имущество организаций</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">13200100</span><span class="dc-meta-txt">Налог на имущество</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Декабрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="dc-total-row"><span class="dc-total-lbl">Сумма обязательства</span><span class="dc-total-val">2 500.00 ₸</span></div>
+              <div class="dc-split">
+                <div class="dc-split-cell" style="background:#EFF6FF">
+                  <div class="dsc-lbl" style="color:#1D4ED8">Оплачено</div>
+                  <div class="dsc-val" style="color:#1D4ED8">2 800.00 ₸</div>
+                </div>
+                <div class="dc-split-cell" style="background:#D1FAE5">
+                  <div class="dsc-lbl" style="color:#065F46">Переплата</div>
+                  <div class="dsc-val" style="color:#065F46">300.00 ₸</div>
+                </div>
+              </div>
+              <div class="dc-notice warn">Платёж прошёл позже срока — уточните пени в ГНС</div>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:5px">📅 22.05.2026</div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn ghost">Смотреть квитанцию</button></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- form (from debt) -->
+      <div class="screen" id="p1-screen-form">
+        <div class="app-header"><button class="back-btn" onclick="p1GoBack()">‹</button><span class="h-title">Оплата налога</span></div>
+        <div class="step-bar">
+          <div class="step-dots"><div class="step-dot act"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+          <div class="step-txt">Шаг 1 из 3 — Реквизиты платежа</div>
+        </div>
+        <div class="screen-body">
+          <div class="field-group"><div class="field-label">Налог</div><div class="field-val readonly" id="p1-f-taxName">—</div></div>
+          <div class="field-group"><div class="field-label">КБК</div><div class="field-val readonly" id="p1-f-kbk">—</div></div>
+          <div class="field-group">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <div class="field-label">Сумма к оплате (₸)</div>
+              <button onclick="p1FillFullAmount()" style="font-size:11px;font-weight:700;color:#0B2D6B;background:#EEF2FF;border:none;border-radius:6px;padding:3px 9px;cursor:pointer">Вся сумма</button>
+            </div>
+            <input class="amount-input" id="p1-amount-input" type="number" min="0.01" step="0.01"
+              placeholder="Введите сумму" oninput="p1CheckFormAmount()"/>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+              <div class="field-error" id="p1-amountError" style="display:none">⚠ Введите сумму больше 0</div>
+              <div style="font-size:11px;color:#9CA3AF;margin-left:auto" id="p1-debt-hint">Задолженность: —</div>
+            </div>
+          </div>
+          <div class="field-group dropdown-wrap">
+            <div class="field-label">Район</div>
+            <div class="field-val filled" id="p1-f-rayon" onclick="p1ToggleDd('p1-dd-rayon')">
+              <span id="p1-f-rayon-text">Октябрьский район</span><span class="field-arrow">∨</span>
+            </div>
+            <div class="dropdown-list" id="p1-dd-rayon">
+              <div class="dd-item active" onclick="p1SelectRayon('Октябрьский район',this)"><span class="dd-check">✓</span>Октябрьский район</div>
+              <div class="dd-item" onclick="p1SelectRayon('Первомайский район',this)"><span class="dd-check"></span>Первомайский район</div>
+              <div class="dd-item" onclick="p1SelectRayon('Свердловский район',this)"><span class="dd-check"></span>Свердловский район</div>
+              <div class="dd-item" onclick="p1SelectRayon('Ленинский район',this)"><span class="dd-check"></span>Ленинский район</div>
+            </div>
+          </div>
+          <div class="field-group dropdown-wrap" id="p1-aimakGroup">
+            <div class="field-label">Айылный аймак</div>
+            <div class="field-val err" id="p1-f-aimak" onclick="p1ToggleDd('p1-dd-aimak')">
+              <span id="p1-f-aimak-text" style="color:#9CA3AF">Выберите аймак</span><span class="field-arrow">∨</span>
+            </div>
+            <div class="field-error" id="p1-aimakError">⚠ Выберите аймак</div>
+            <div class="dropdown-list" id="p1-dd-aimak">
+              <div class="dd-item" onclick="p1SelectAimak('Аламединский аймак',this)"><span class="dd-check"></span>Аламединский аймак</div>
+              <div class="dd-item" onclick="p1SelectAimak('Кант аймак',this)"><span class="dd-check"></span>Кант аймак</div>
+              <div class="dd-item" onclick="p1SelectAimak('Московский аймак',this)"><span class="dd-check"></span>Московский аймак</div>
+              <div class="dd-item" onclick="p1SelectAimak('Панфиловский аймак',this)"><span class="dd-check"></span>Панфиловский аймак</div>
+            </div>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn-primary disabled" id="p1-btnFormNext" onclick="p1GoToAccounts()">Далее</button>
+        </div>
+      </div>
+
+      <!-- paycode (p1) -->
+      <div class="screen" id="p1-screen-paycode">
+        <div class="app-header"><button class="back-btn" onclick="p1GoBack()">‹</button><span class="h-title">Получение кода платежа</span></div>
+        <div class="paycode-wrap">
+          <div style="font-size:44px;margin-bottom:16px">🔐</div>
+          <div style="font-size:17px;font-weight:700;color:#1A1A2E;margin-bottom:6px">Формируем код платежа</div>
+          <div style="font-size:13px;color:#6B7280;margin-bottom:28px;text-align:center;max-width:240px;line-height:1.5">Запрашиваем уникальный код у платёжного шлюза ГНС через Тундук</div>
+          <div class="paycode-steps">
+            <div class="paycode-step" id="p1-ps1">
+              <div class="ps-icon wait" id="p1-ps1-icon"><span>📋</span></div>
+              <div class="ps-text"><div class="ps-title">Формируем запрос</div><div class="ps-sub">Подготовка данных платежа</div></div>
+            </div>
+            <div class="paycode-step" id="p1-ps2">
+              <div class="ps-icon wait" id="p1-ps2-icon"><span>🔗</span></div>
+              <div class="ps-text"><div class="ps-title">Обращаемся к платёжному шлюзу</div><div class="ps-sub">Запрос к ГНС через Тундук/X-Road</div></div>
+            </div>
+            <div class="paycode-step" id="p1-ps3">
+              <div class="ps-icon wait" id="p1-ps3-icon"><span>✅</span></div>
+              <div class="ps-text"><div class="ps-title">Код платежа получен</div><div class="ps-sub">Платёж готов к исполнению</div></div>
+            </div>
+          </div>
+          <div class="paycode-result" id="p1-paycode-result" style="display:none;margin-top:24px;width:100%;max-width:300px">
+            <div class="pr-label">Код платежа</div>
+            <div class="pr-code" id="p1-pr-code">—</div>
+            <div class="pr-sub">Сохранится автоматически</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- accounts -->
+      <div class="screen" id="p1-screen-accounts">
+        <div class="app-header"><button class="back-btn" onclick="p1GoBack()">‹</button><span class="h-title">Выбор счёта</span></div>
+        <div class="step-bar">
+          <div class="step-dots"><div class="step-dot done"></div><div class="step-dot act"></div><div class="step-dot"></div></div>
+          <div class="step-txt">Шаг 2 из 3 — Счёт списания</div>
+        </div>
+        <div class="screen-body">
+          <div class="amount-banner"><div class="aml">К оплате</div><div class="amv" id="p1-acc-amount">—</div></div>
+          <div class="code-card"><div class="cl">Код платежа</div><div class="cv" id="p1-paycode-display">—</div></div>
+          <div class="section-title">Выберите счёт списания</div>
+          <div class="account-card" id="p1-acc1" onclick="p1SelectAcc(1)">
+            <div class="radio-dot" id="p1-r1"></div>
+            <div><div class="acc-name">Расчётный счёт</div><div class="acc-num">KGZ ●●● 4821</div><div class="acc-bal" id="p1-acc1-bal">24 500.00 ₸</div></div>
+          </div>
+          <div class="account-card" id="p1-acc2" onclick="p1SelectAcc(2)">
+            <div class="radio-dot" id="p1-r2"></div>
+            <div><div class="acc-name">Сберегательный счёт</div><div class="acc-num">KGZ ●●● 5512</div><div class="acc-bal low" id="p1-acc2-bal">2 100.00 ₸</div></div>
+          </div>
+          <div class="field-error" id="p1-accError" style="display:none">⚠ Недостаточно средств на выбранном счёте</div>
+          <div class="spacer"></div>
+          <button class="btn-primary disabled" id="p1-btnAccNext" onclick="p1GoToConfirm()">Далее</button>
+        </div>
+      </div>
+
+      <!-- confirm -->
+      <div class="screen" id="p1-screen-confirm">
+        <div class="confirm-top">
+          <div class="ct-lbl">К оплате</div>
+          <div class="ct-amt" id="p1-conf-amount">—</div>
+          <div class="ct-sub" id="p1-conf-taxname">—</div>
+        </div>
+        <div class="screen-body">
+          <div class="info-block">
+            <div class="info-row"><span class="info-lbl">Получатель</span><span class="info-val">ГНС Кыргызстана</span></div>
+            <div class="info-row"><span class="info-lbl">ИНН</span><span class="info-val" id="p1-conf-inn">—</span></div>
+            <div class="info-row"><span class="info-lbl">КБК</span><span class="info-val" id="p1-conf-kbk">—</span></div>
+            <div class="info-row"><span class="info-lbl">Район</span><span class="info-val" id="p1-conf-rayon">—</span></div>
+            <div class="info-row"><span class="info-lbl">Аймак</span><span class="info-val" id="p1-conf-aimak">—</span></div>
+            <div class="info-row"><span class="info-lbl">Счёт списания</span><span class="info-val" id="p1-conf-acc">—</span></div>
+            <div class="info-row"><span class="info-lbl">Код платежа</span><span class="info-val" id="p1-conf-paycode" style="font-family:monospace;font-size:12px;color:#0B2D6B">—</span></div>
+          </div>
+          <div class="info-block">
+            <div class="info-row"><span class="info-lbl">Комиссия</span><span class="info-val green">Бесплатно</span></div>
+            <div class="info-row"><span class="info-lbl" style="font-weight:700;color:#1A1A2E">Итого</span><span class="info-val big" id="p1-conf-total">—</span></div>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn-primary" onclick="p1GoToProcessing()">Подтвердить оплату</button>
+        </div>
+      </div>
+
+      <!-- processing -->
+      <div class="screen" id="p1-screen-processing">
+        <div class="spinner-wrap">
+          <div class="spinner"></div>
+          <div class="sp-title">Платёж в обработке…</div>
+          <div class="sp-sub">Polling по transactionId каждые 3 сек.</div>
+          <div style="margin-top:12px;width:100%;max-width:300px;display:none">
+            <div style="font-size:10px;color:#9CA3AF;text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Статус определяется автоматически</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <button onclick="p1ForceStatus(3)"  style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #D1FAE5;background:#F0FDF4;color:#065F46;cursor:pointer">✅ 3 — Оплачен</button>
+              <button onclick="p1ForceStatus(7)"  style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #E5E7EB;background:#F9FAFB;color:#374151;cursor:pointer">⏱ 7 — С задержкой</button>
+              <button onclick="p1ForceStatus(2)"  style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #FDE68A;background:#FFFBEB;color:#92400E;cursor:pointer">⚠️ 2 — Частично</button>
+              <button onclick="p1ForceStatus(6)"  style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #FDE68A;background:#FFFBEB;color:#92400E;cursor:pointer">⚠️ 6 — Частично+</button>
+              <button onclick="p1ForceStatus(4)"  style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #C7D2FE;background:#EEF2FF;color:#1E40AF;cursor:pointer">ℹ️ 4 — Переплата</button>
+              <button onclick="p1ForceStatus(8)"  style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #C7D2FE;background:#EEF2FF;color:#1E40AF;cursor:pointer">ℹ️ 8 — Перепл+</button>
+              <button onclick="p1ForceStatus(5)"  style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #FCA5A5;background:#FEF2F2;color:#991B1B;cursor:pointer;grid-column:1/-1">❌ 5 — Просрочено</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- success (status 3 — Оплачен / status 7 — Оплачено с задержкой) -->
+      <div class="screen" id="p1-screen-success">
+        <div class="result-wrap">
+          <div class="result-icon">✅</div>
+          <div class="result-title" id="p1-res-title">Оплачено успешно</div>
+          <div class="result-sub" id="p1-res-sub">Платёж зарегистрирован в ГНС</div>
+          <span class="status-badge ok" id="p1-res-badge">Статус 3 — Оплачен</span>
+          <div class="result-details">
+            <div class="info-row"><span class="info-lbl">Сумма</span><span class="info-val big" id="p1-res-amount">—</span></div>
+            <div class="info-row"><span class="info-lbl">Дата и время</span><span class="info-val" id="p1-res-date">—</span></div>
+          </div>
+          <div class="code-card" style="width:100%"><div class="cl">Код платежа</div><div class="cv" id="p1-res-paycode">—</div></div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <button class="btn-secondary">Сохранить квитанцию</button>
+            <button class="btn-text-link" onclick="p1Reset()">На главный экран</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- partial payment (status 2 — Частично оплачено / status 6 — Частичная оплата с задержкой) -->
+      <div class="screen" id="p1-screen-partial">
+        <div class="result-wrap">
+          <div class="result-icon">⚠️</div>
+          <div class="result-title" id="p1-partial-title">Частичная оплата</div>
+          <div class="result-sub">Зачтена часть суммы. Оплатите остаток для полного погашения.</div>
+          <span class="status-badge partial" id="p1-partial-badge">Статус 2 — Частично оплачено</span>
+          <div class="result-details">
+            <div class="info-row"><span class="info-lbl">Зачтено (paidAmount)</span><span class="info-val big" id="p1-partial-paid">—</span></div>
+            <div class="info-row"><span class="info-lbl">Остаток долга (underpaymentAmount)</span><span class="info-val" style="color:#DC2626;font-weight:700" id="p1-partial-remain">—</span></div>
+            <div class="info-row"><span class="info-lbl">Дата</span><span class="info-val" id="p1-partial-date">—</span></div>
+          </div>
+          <div class="code-card" style="width:100%"><div class="cl">Код платежа</div><div class="cv" id="p1-partial-paycode">—</div></div>
+          <div class="alert warn" style="width:100%">⚠️ &nbsp;Задолженность не погашена полностью. Рекомендуем доплатить остаток.</div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <button class="btn-primary" onclick="p1PayRemainder()">Доплатить остаток</button>
+            <button class="btn-secondary">Сохранить квитанцию</button>
+            <button class="btn-text-link" onclick="p1Reset()">На главный экран</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- overpayment (status 4 — Переплачено / status 8 — Переплата с задержкой) -->
+      <div class="screen" id="p1-screen-overpay">
+        <div class="result-wrap">
+          <div class="result-icon">ℹ️</div>
+          <div class="result-title" id="p1-overpay-title">Переплата</div>
+          <div class="result-sub">Оплачено больше суммы задолженности. Переплата будет зачтена.</div>
+          <span class="status-badge overpay" id="p1-overpay-badge">Статус 4 — Переплачено</span>
+          <div class="result-details">
+            <div class="info-row"><span class="info-lbl">Оплачено (paidAmount)</span><span class="info-val big" id="p1-overpay-paid">—</span></div>
+            <div class="info-row"><span class="info-lbl">Переплата</span><span class="info-val" style="color:#10B981;font-weight:700" id="p1-overpay-extra">—</span></div>
+            <div class="info-row"><span class="info-lbl">Дата</span><span class="info-val" id="p1-overpay-date">—</span></div>
+          </div>
+          <div class="code-card" style="width:100%"><div class="cl">Код платежа</div><div class="cv" id="p1-overpay-paycode">—</div></div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <button class="btn-secondary">Сохранить квитанцию</button>
+            <button class="btn-text-link" onclick="p1Reset()">На главный экран</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- overdue (status 5 — Просрочено) -->
+      <div class="screen" id="p1-screen-overdue">
+        <div class="result-wrap">
+          <div class="result-icon">🕐</div>
+          <div class="result-title">Просрочено</div>
+          <div class="result-sub">Срок оплаты истёк. Могут начисляться пени. Обратитесь в ГНС.</div>
+          <span class="status-badge overdue">Статус 5 — Просрочено</span>
+          <div class="result-details">
+            <div class="info-row"><span class="info-lbl">Сумма долга</span><span class="info-val" style="color:#DC2626;font-weight:700" id="p1-overdue-amount">—</span></div>
+            <div class="info-row"><span class="info-lbl">Последняя дата</span><span class="info-val" id="p1-overdue-date">—</span></div>
+          </div>
+          <div class="code-card" style="width:100%"><div class="cl">Код платежа</div><div class="cv" id="p1-overdue-paycode">—</div></div>
+          <div class="alert err" style="width:100%">❌ &nbsp;Обратитесь в отделение ГНС или позвоните на горячую линию.</div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <button class="btn-primary" onclick="p1Reset()">Повторить попытку</button>
+            <button class="btn-text-link" onclick="p1Reset()">На главный экран</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /p1-screens -->
+
+    <!-- overlay + sheet -->
+    <div class="overlay" id="p1-overlay" onclick="p1CloseSheet()"></div>
+    <div class="bottom-sheet" id="p1-bottomSheet">
+      <div class="bs-handle"></div>
+      <div class="bs-header"><div class="bs-title" id="p1-bs-title">—</div><div class="bs-rayon">📍 <span id="p1-bs-rayon">—</span></div></div>
+      <div class="bs-body" id="p1-bs-body"></div>
+      <div class="bs-footer">
+        <button class="btn-primary" onclick="p1GoToPayment()">Перейти к оплате</button>
+        <button class="btn-text-link" onclick="p1CloseSheet()">Закрыть</button>
+      </div>
+    </div>
+  </div><!-- /phone1 -->
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  PHONE 2 — Самостоятельная оплата                  -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="phone-col">
+  <div class="phone-col-label">Флоу 2 — Самостоятельная оплата налога</div>
+  <div class="phone-shell" id="phone2">
+    <div class="notch"></div>
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <div class="icons"><span>●●●</span><span>▊</span></div>
+    </div>
+    <div class="app-header" id="p2-mainHeader">
+      <button class="back-btn" onclick="p2GoBack()">‹</button>
+      <span class="h-title" id="p2-headerTitle">Налоговые платежи</span>
+    </div>
+    <div class="screen-container" id="p2-screens">
+
+      <!-- home -->
+      <div class="screen active" id="p2-screen-home">
+        <div class="home-body">
+          <p class="screen-subtitle">Данные получены от ГНС по вашему ИНН. Нажмите на карточку для оплаты.</p>
+
+          <div class="debts-section-hdr">
+            <span class="dsh-title">Активные задолженности</span>
+            <span class="dsh-count active-cnt">2</span>
+          </div>
+
+          <div class="debt-card p2-debt-income" onclick="p2StartDebtFlow('income')">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#FFF1F2,#FEE2E2)">
+              <span>📍</span><span class="rayon">Первомайский район</span>
+              <span class="dc-status st5">❌ Просрочено</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Налог на прибыль организаций</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10100101</span><span class="dc-meta-txt">Налог на прибыль орг.</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Сентябрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="amount-row"><span class="amount-label">Сумма долга</span><span class="amount">3 200.00 ₸</span></div>
+              <div class="dc-notice err">⚠ Срок оплаты истёк — возможно начисление пеней</div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn danger" onclick="event.stopPropagation();p2StartDebtFlow('income')">Оплатить (возможны пени)</button></div>
+          </div>
+
+          <div class="debt-card p2-debt-nds" onclick="p2StartDebtFlow('nds')">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#FFF7ED,#FED7AA)">
+              <span>📍</span><span class="rayon">Октябрьский район</span>
+              <span class="dc-status st2">⚠ Частично оплачено</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Налог на добавленную стоимость</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10400100</span><span class="dc-meta-txt">НДС на товары и услуги</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Декабрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="dc-total-row"><span class="dc-total-lbl">Исходная задолженность</span><span class="dc-total-val">6 317.37 ₸</span></div>
+              <div class="dc-split">
+                <div class="dc-split-cell" style="background:#FEF9C3">
+                  <div class="dsc-lbl" style="color:#92400E">Зачтено</div>
+                  <div class="dsc-val" style="color:#92400E">4 317.37 ₸</div>
+                </div>
+                <div class="dc-split-cell" style="background:#FEE2E2">
+                  <div class="dsc-lbl" style="color:#991B1B">Остаток долга</div>
+                  <div class="dsc-val" style="color:#991B1B">2 000.00 ₸</div>
+                </div>
+              </div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn" onclick="event.stopPropagation();p2StartDebtFlow('nds')">Доплатить остаток</button></div>
+          </div>
+
+          <div class="home-section-title" style="margin-top:2px">Другой сценарий</div>
+          <div class="service-card" onclick="p2Navigate('form')">
+            <div class="service-icon blue">💳</div>
+            <div class="service-info">
+              <div class="service-name">Оплата без проверки задолженности</div>
+              <div class="service-desc">Выберите налог и оплатите вручную</div>
+            </div>
+            <span class="service-arrow">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- debt preview placeholder -->
+      <div class="screen" id="p2-screen-debts-preview">
+        <div class="app-header"><button class="back-btn" onclick="p2GoBack()">‹</button><span class="h-title">Налоговая задолженность</span><span class="h-badge">2</span></div>
+        <div class="screen-body">
+          <div class="alert">ℹ️ &nbsp;Нажмите на карточку задолженности, чтобы сразу перейти в флоу оплаты с предзаполненными реквизитами.</div>
+
+          <!-- активный долг — статус 5 -->
+          <div class="debts-section-hdr">
+            <span class="dsh-title">Активные задолженности</span>
+            <span class="dsh-count active-cnt">2</span>
+          </div>
+          <div class="debt-card p2-debt-income" onclick="p2StartDebtFlow('income')">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#FFF1F2,#FEE2E2)">
+              <span>📍</span><span class="rayon">Первомайский район</span>
+              <span class="dc-status st5">❌ Просрочено</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Налог на прибыль организаций</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10100101</span><span class="dc-meta-txt">Налог на прибыль орг.</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Сентябрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="amount-row"><span class="amount-label">Сумма долга</span><span class="amount">3 200.00 ₸</span></div>
+              <div class="dc-notice err">⚠ Срок оплаты истёк — возможно начисление пеней</div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn danger" onclick="event.stopPropagation();p2StartDebtFlow('income')">Оплатить (возможны пени)</button></div>
+          </div>
+
+          <!-- частичная оплата — статус 2 -->
+          <div class="debt-card p2-debt-nds" onclick="p2StartDebtFlow('nds')">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#FFF7ED,#FED7AA)">
+              <span>📍</span><span class="rayon">Октябрьский район</span>
+              <span class="dc-status st2">⚠ Частично оплачено</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Налог на добавленную стоимость</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10400100</span><span class="dc-meta-txt">НДС на товары и услуги</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Декабрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="dc-total-row"><span class="dc-total-lbl">Исходная задолженность</span><span class="dc-total-val">6 317.37 ₸</span></div>
+              <div class="dc-split">
+                <div class="dc-split-cell" style="background:#FEF9C3">
+                  <div class="dsc-lbl" style="color:#92400E">Зачтено</div>
+                  <div class="dsc-val" style="color:#92400E">4 317.37 ₸</div>
+                </div>
+                <div class="dc-split-cell" style="background:#FEE2E2">
+                  <div class="dsc-lbl" style="color:#991B1B">Остаток долга</div>
+                  <div class="dsc-val" style="color:#991B1B">2 000.00 ₸</div>
+                </div>
+              </div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn" onclick="event.stopPropagation();p2StartDebtFlow('nds')">Доплатить остаток</button></div>
+          </div>
+
+          <!-- история — статус 3 -->
+          <div class="debts-section-hdr" style="margin-top:4px">
+            <span class="dsh-title">История</span>
+            <span class="dsh-count history-cnt">1</span>
+          </div>
+          <div class="debt-card" style="cursor:default;opacity:0.88">
+            <div class="debt-card-hdr" style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7)">
+              <span>📍</span><span class="rayon">Свердловский район</span>
+              <span class="dc-status st3">✓ Оплачен</span>
+            </div>
+            <div class="debt-item">
+              <div class="tax-name">Акцизный налог на алкоголь</div>
+              <div class="dc-meta">
+                <div class="dc-meta-row"><span class="dc-meta-lbl">КБК</span><span class="kbk-tag">10500200</span><span class="dc-meta-txt">Акцизы на алкоголь</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">Период</span><span class="dc-meta-txt">Январь–Декабрь 2025</span></div>
+                <div class="dc-meta-row"><span class="dc-meta-lbl">ИНН</span><span class="dc-meta-txt">12345678901234</span></div>
+              </div>
+              <div class="amount-row"><span class="amount-label">Оплачено</span><span class="amount" style="color:#059669">6 317.37 ₸</span></div>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:6px">📅 15.05.2026 · 14:23</div>
+            </div>
+            <div class="pay-btn-row"><button class="pay-btn ghost">Смотреть квитанцию</button></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- standalone form -->
+      <div class="screen" id="p2-screen-form">
+        <div class="app-header"><button class="back-btn" onclick="p2GoBack()">‹</button><span class="h-title">Оплата налога</span></div>
+        <div class="step-bar">
+          <div class="step-dots"><div class="step-dot act"></div><div class="step-dot"></div></div>
+          <div class="step-txt">Шаг 1 из 2 — Реквизиты платежа</div>
+        </div>
+        <div class="screen-body">
+
+          <!-- ИНН readonly -->
+          <div class="field-group">
+            <div class="field-label">ИНН</div>
+            <div class="field-val readonly">12345678901234</div>
+          </div>
+
+          <!-- Район -->
+          <div class="field-group dropdown-wrap">
+            <div class="field-label">Район</div>
+            <div class="field-val" id="p2-f-rayon" onclick="p2ToggleDd('p2-dd-rayon')">
+              <span id="p2-f-rayon-text" style="color:#9CA3AF">Выберите район</span>
+              <span class="field-arrow">∨</span>
+            </div>
+            <div class="field-error" id="p2-rayonError" style="display:none">⚠ Выберите район</div>
+            <div class="dropdown-list" id="p2-dd-rayon">
+              <div class="dd-item" onclick="p2SelectRayon('Октябрьский район',this)"><span class="dd-check"></span>Октябрьский район</div>
+              <div class="dd-item" onclick="p2SelectRayon('Первомайский район',this)"><span class="dd-check"></span>Первомайский район</div>
+              <div class="dd-item" onclick="p2SelectRayon('Свердловский район',this)"><span class="dd-check"></span>Свердловский район</div>
+              <div class="dd-item" onclick="p2SelectRayon('Ленинский район',this)"><span class="dd-check"></span>Ленинский район</div>
+            </div>
+          </div>
+
+          <!-- Аймак -->
+          <div class="field-group dropdown-wrap" id="p2-aimakGroup" style="display:none">
+            <div class="field-label">Айылный аймак</div>
+            <div class="field-val err" id="p2-f-aimak" onclick="p2ToggleDd('p2-dd-aimak')">
+              <span id="p2-f-aimak-text" style="color:#9CA3AF">Выберите аймак</span><span class="field-arrow">∨</span>
+            </div>
+            <div class="field-error" id="p2-aimakError">⚠ Выберите аймак</div>
+            <div class="dropdown-list" id="p2-dd-aimak">
+              <div class="dd-item" onclick="p2SelectAimak('Аламединский аймак',this)"><span class="dd-check"></span>Аламединский аймак</div>
+              <div class="dd-item" onclick="p2SelectAimak('Кант аймак',this)"><span class="dd-check"></span>Кант аймак</div>
+              <div class="dd-item" onclick="p2SelectAimak('Московский аймак',this)"><span class="dd-check"></span>Московский аймак</div>
+            </div>
+          </div>
+
+          <!-- Вид налога -->
+          <div class="field-group dropdown-wrap">
+            <div class="field-label">Вид налога</div>
+            <div class="field-val" id="p2-f-tax" onclick="p2ToggleDd('p2-dd-tax')" style="opacity:0.4;pointer-events:none">
+              <span id="p2-f-tax-text" style="color:#9CA3AF">Выберите налог</span><span class="field-arrow">∨</span>
+            </div>
+            <div class="dropdown-list" id="p2-dd-tax">
+              <div class="dd-item" onclick="p2SelectTax('НДС','1040',this)">
+                <span class="dd-check"></span>
+                <div><div>Налог на добавленную стоимость</div><div class="dd-sub">Код: 1040</div></div>
+              </div>
+              <div class="dd-item" onclick="p2SelectTax('Налог на прибыль','1010',this)">
+                <span class="dd-check"></span>
+                <div><div>Налог на прибыль организаций</div><div class="dd-sub">Код: 1010</div></div>
+              </div>
+              <div class="dd-item" onclick="p2SelectTax('Налог на имущество','1050',this)">
+                <span class="dd-check"></span>
+                <div><div>Налог на имущество</div><div class="dd-sub">Код: 1050</div></div>
+              </div>
+              <div class="dd-item" onclick="p2SelectTax('Подоходный налог','1020',this)">
+                <span class="dd-check"></span>
+                <div><div>Подоходный налог (НДФЛ)</div><div class="dd-sub">Код: 1020</div></div>
+              </div>
+              <div class="dd-item" onclick="p2SelectTax('Земельный налог','1060',this)">
+                <span class="dd-check"></span>
+                <div><div>Земельный налог</div><div class="dd-sub">Код: 1060</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- КБК -->
+          <div class="field-group dropdown-wrap">
+            <div class="field-label">КБК</div>
+            <div class="field-val" id="p2-f-kbk" onclick="p2ToggleDd('p2-dd-kbk')" style="opacity:0.4;pointer-events:none">
+              <span id="p2-f-kbk-text" style="color:#9CA3AF">Выберите КБК</span><span class="field-arrow">∨</span>
+            </div>
+            <div class="dropdown-list" id="p2-dd-kbk"><!-- filled dynamically --></div>
+          </div>
+
+          <!-- Сумма -->
+          <div class="field-group">
+            <div class="field-label">Сумма к оплате (₸)</div>
+            <input class="amount-input" id="p2-amount-input" type="number" min="1"
+              placeholder="Введите сумму" oninput="p2CheckForm()" style="opacity:0.4;pointer-events:none"/>
+            <div class="field-error" id="p2-amountError" style="display:none">⚠ Введите сумму больше 0</div>
+          </div>
+
+          <!-- Счёт списания -->
+          <div class="field-group">
+            <div class="field-label">Счёт списания</div>
+            <div class="account-card" id="p2-form-acc1" onclick="p2FormSelectAcc(1)">
+              <div class="radio-dot" id="p2-form-r1"></div>
+              <div><div class="acc-name">Расчётный счёт</div><div class="acc-num">KGZ ●●● 4821</div><div class="acc-bal" id="p2-form-acc1-bal">24 500.00 ₸</div></div>
+            </div>
+            <div class="account-card" id="p2-form-acc2" onclick="p2FormSelectAcc(2)">
+              <div class="radio-dot" id="p2-form-r2"></div>
+              <div><div class="acc-name">Сберегательный счёт</div><div class="acc-num">KGZ ●●● 5512</div><div class="acc-bal low" id="p2-form-acc2-bal">2 100.00 ₸</div></div>
+            </div>
+            <div class="field-error" id="p2-accFormError" style="display:none">⚠ Недостаточно средств на выбранном счёте</div>
+          </div>
+
+          <div class="spacer"></div>
+          <button class="btn-primary disabled" id="p2-btnFormNext" onclick="p2GoToAccounts()">Далее</button>
+        </div>
+      </div>
+
+      <!-- paycode (p2) -->
+      <div class="screen" id="p2-screen-paycode">
+        <div class="app-header"><button class="back-btn" onclick="p2GoBack()">‹</button><span class="h-title">Получение кода платежа</span></div>
+        <div class="paycode-wrap">
+          <div style="font-size:44px;margin-bottom:16px">🔐</div>
+          <div style="font-size:17px;font-weight:700;color:#1A1A2E;margin-bottom:6px">Формируем код платежа</div>
+          <div style="font-size:13px;color:#6B7280;margin-bottom:28px;text-align:center;max-width:240px;line-height:1.5">Запрашиваем уникальный код у платёжного шлюза ГНС через Тундук</div>
+          <div class="paycode-steps">
+            <div class="paycode-step" id="p2-ps1">
+              <div class="ps-icon wait" id="p2-ps1-icon"><span>📋</span></div>
+              <div class="ps-text"><div class="ps-title">Формируем запрос</div><div class="ps-sub">Подготовка данных платежа</div></div>
+            </div>
+            <div class="paycode-step" id="p2-ps2">
+              <div class="ps-icon wait" id="p2-ps2-icon"><span>🔗</span></div>
+              <div class="ps-text"><div class="ps-title">Обращаемся к платёжному шлюзу</div><div class="ps-sub">Запрос к ГНС через Тундук/X-Road</div></div>
+            </div>
+            <div class="paycode-step" id="p2-ps3">
+              <div class="ps-icon wait" id="p2-ps3-icon"><span>✅</span></div>
+              <div class="ps-text"><div class="ps-title">Код платежа получен</div><div class="ps-sub">Платёж готов к исполнению</div></div>
+            </div>
+          </div>
+          <div class="paycode-result" id="p2-paycode-result" style="display:none;margin-top:24px;width:100%;max-width:300px">
+            <div class="pr-label">Код платежа</div>
+            <div class="pr-code" id="p2-pr-code">—</div>
+            <div class="pr-sub">Сохранится автоматически</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- accounts -->
+      <div class="screen" id="p2-screen-accounts">
+        <div class="app-header"><button class="back-btn" onclick="p2GoBack()">‹</button><span class="h-title">Выбор счёта</span></div>
+        <div class="step-bar">
+          <div class="step-dots"><div class="step-dot done"></div><div class="step-dot act"></div><div class="step-dot"></div></div>
+          <div class="step-txt">Шаг 2 из 3 — Счёт списания</div>
+        </div>
+        <div class="screen-body">
+          <div class="amount-banner"><div class="aml">К оплате</div><div class="amv" id="p2-acc-amount">—</div></div>
+          <div class="code-card"><div class="cl">Код платежа</div><div class="cv" id="p2-paycode-display">—</div></div>
+          <div class="section-title">Выберите счёт списания</div>
+          <div class="account-card" id="p2-acc1" onclick="p2SelectAcc(1)">
+            <div class="radio-dot" id="p2-r1"></div>
+            <div><div class="acc-name">Расчётный счёт</div><div class="acc-num">KGZ ●●● 4821</div><div class="acc-bal" id="p2-acc1-bal">24 500.00 ₸</div></div>
+          </div>
+          <div class="account-card" id="p2-acc2" onclick="p2SelectAcc(2)">
+            <div class="radio-dot" id="p2-r2"></div>
+            <div><div class="acc-name">Сберегательный счёт</div><div class="acc-num">KGZ ●●● 5512</div><div class="acc-bal low" id="p2-acc2-bal">2 100.00 ₸</div></div>
+          </div>
+          <div class="field-error" id="p2-accError" style="display:none">⚠ Недостаточно средств на выбранном счёте</div>
+          <div class="spacer"></div>
+          <button class="btn-primary disabled" id="p2-btnAccNext" onclick="p2GoToConfirm()">Далее</button>
+        </div>
+      </div>
+
+      <!-- confirm -->
+      <div class="screen" id="p2-screen-confirm">
+        <div class="app-header"><button class="back-btn" onclick="p2GoBack()">‹</button><span class="h-title">Оплата налога</span></div>
+        <div class="step-bar">
+          <div class="step-dots"><div class="step-dot done"></div><div class="step-dot act"></div></div>
+          <div class="step-txt">Шаг 2 из 2 — Подтверждение</div>
+        </div>
+        <div class="confirm-top" style="margin-top:0">
+          <div class="ct-lbl">К оплате</div>
+          <div class="ct-amt" id="p2-conf-amount">—</div>
+          <div class="ct-sub" id="p2-conf-taxname">—</div>
+        </div>
+        <div class="screen-body">
+          <div class="info-block">
+            <div class="info-row"><span class="info-lbl">Получатель</span><span class="info-val">ГНС Кыргызстана</span></div>
+            <div class="info-row"><span class="info-lbl">ИНН</span><span class="info-val">12345678901234</span></div>
+            <div class="info-row"><span class="info-lbl">Налог</span><span class="info-val" id="p2-conf-taxname2">—</span></div>
+            <div class="info-row"><span class="info-lbl">КБК</span><span class="info-val" id="p2-conf-kbk">—</span></div>
+            <div class="info-row"><span class="info-lbl">Район</span><span class="info-val" id="p2-conf-rayon">—</span></div>
+            <div class="info-row"><span class="info-lbl">Аймак</span><span class="info-val" id="p2-conf-aimak">—</span></div>
+            <div class="info-row"><span class="info-lbl">Счёт списания</span><span class="info-val" id="p2-conf-acc">—</span></div>
+            <div class="info-row"><span class="info-lbl">Код платежа</span><span class="info-val" id="p2-conf-paycode" style="font-family:monospace;font-size:12px;color:#0B2D6B">—</span></div>
+          </div>
+          <div class="info-block">
+            <div class="info-row"><span class="info-lbl">Комиссия</span><span class="info-val green">Бесплатно</span></div>
+            <div class="info-row"><span class="info-lbl" style="font-weight:700;color:#1A1A2E">Итого</span><span class="info-val big" id="p2-conf-total">—</span></div>
+          </div>
+          <div class="spacer"></div>
+          <button class="btn-primary" onclick="p2GoToProcessing()">Подтвердить оплату</button>
+        </div>
+      </div>
+
+      <!-- processing -->
+      <div class="screen" id="p2-screen-processing">
+        <div class="spinner-wrap">
+          <div class="spinner"></div>
+          <div class="sp-title">Платёж в обработке…</div>
+          <div class="sp-sub">Не закрывайте приложение. Это займёт несколько секунд.</div>
+          <div style="margin-top:12px;width:100%;max-width:300px">
+            <div style="font-size:10px;color:#9CA3AF;text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Демо — выбери статус вручную</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <button onclick="p2ForceStatus(3)" style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #D1FAE5;background:#F0FDF4;color:#065F46;cursor:pointer">✅ 3 — Оплачен</button>
+              <button onclick="p2ForceStatus(7)" style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #E5E7EB;background:#F9FAFB;color:#374151;cursor:pointer">⏱ 7 — С задержкой</button>
+              <button onclick="p2ForceStatus(2)" style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #FDE68A;background:#FFFBEB;color:#92400E;cursor:pointer">⚠️ 2 — Частично</button>
+              <button onclick="p2ForceStatus(6)" style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #FDE68A;background:#FFFBEB;color:#92400E;cursor:pointer">⚠️ 6 — Частично+</button>
+              <button onclick="p2ForceStatus(4)" style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #C7D2FE;background:#EEF2FF;color:#1E40AF;cursor:pointer">ℹ️ 4 — Переплата</button>
+              <button onclick="p2ForceStatus(8)" style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #C7D2FE;background:#EEF2FF;color:#1E40AF;cursor:pointer">ℹ️ 8 — Перепл+</button>
+              <button onclick="p2ForceStatus(5)" style="font-size:11px;padding:6px;border-radius:8px;border:1px solid #FCA5A5;background:#FEF2F2;color:#991B1B;cursor:pointer;grid-column:1/-1">❌ 5 — Просрочено</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- success (status 3 — Оплачен / status 7 — Оплачено с задержкой) -->
+      <div class="screen" id="p2-screen-success">
+        <div class="result-wrap">
+          <div class="result-icon">✅</div>
+          <div class="result-title" id="p2-res-title">Оплачено успешно</div>
+          <div class="result-sub" id="p2-res-sub">Платёж зарегистрирован в ГНС</div>
+          <span class="status-badge ok" id="p2-res-badge">Статус 3 — Оплачен</span>
+          <div class="result-details">
+            <div class="info-row"><span class="info-lbl">Сумма</span><span class="info-val big" id="p2-res-amount">—</span></div>
+            <div class="info-row"><span class="info-lbl">Дата и время</span><span class="info-val" id="p2-res-date">—</span></div>
+          </div>
+          <div class="code-card" style="width:100%"><div class="cl">Код платежа</div><div class="cv" id="p2-res-paycode">—</div></div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <button class="btn-secondary">Сохранить квитанцию</button>
+            <button class="btn-text-link" onclick="p2Reset()">На главный экран</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- partial payment (status 2 — Частично оплачено / status 6 — Частично + просрочка) -->
+      <div class="screen" id="p2-screen-partial">
+        <div class="result-wrap">
+          <div class="result-icon">⚠️</div>
+          <div class="result-title" id="p2-partial-title">Оплачено частично</div>
+          <div class="result-sub">Зачтена часть суммы. Оплатите остаток для полного погашения.</div>
+          <span class="status-badge partial" id="p2-partial-badge">Статус 2 — Частично оплачено</span>
+          <div class="result-details">
+            <div class="info-row"><span class="info-lbl">Зачтено (paidAmount)</span><span class="info-val big" id="p2-partial-paid">—</span></div>
+            <div class="info-row"><span class="info-lbl">Остаток долга</span><span class="info-val" style="color:#DC2626;font-weight:700" id="p2-partial-remain">—</span></div>
+            <div class="info-row"><span class="info-lbl">Дата</span><span class="info-val" id="p2-partial-date">—</span></div>
+          </div>
+          <div class="code-card" style="width:100%"><div class="cl">Код платежа</div><div class="cv" id="p2-partial-paycode">—</div></div>
+          <div class="alert warn" style="width:100%" id="p2-partial-alert">⚠️ &nbsp;Задолженность не погашена полностью. Рекомендуем доплатить остаток.</div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <button class="btn-primary" onclick="p2PayRemainder()">Доплатить остаток</button>
+            <button class="btn-secondary">Сохранить квитанцию</button>
+            <button class="btn-text-link" onclick="p2Reset()">На главный экран</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- overpayment (status 4 — Переплачено / status 8 — Переплата с задержкой) -->
+      <div class="screen" id="p2-screen-overpay">
+        <div class="result-wrap">
+          <div class="result-icon">ℹ️</div>
+          <div class="result-title" id="p2-overpay-title">Зафиксирована переплата</div>
+          <div class="result-sub" id="p2-overpay-sub">Оплачено больше суммы обязательства. Переплата будет зачтена ГНС.</div>
+          <span class="status-badge overpay" id="p2-overpay-badge">Статус 4 — Переплачено</span>
+          <div class="result-details">
+            <div class="info-row"><span class="info-lbl">Оплачено (paidAmount)</span><span class="info-val big" id="p2-overpay-paid">—</span></div>
+            <div class="info-row"><span class="info-lbl">Переплата</span><span class="info-val" style="color:#10B981;font-weight:700" id="p2-overpay-extra">—</span></div>
+            <div class="info-row"><span class="info-lbl">Дата</span><span class="info-val" id="p2-overpay-date">—</span></div>
+          </div>
+          <div class="code-card" style="width:100%"><div class="cl">Код платежа</div><div class="cv" id="p2-overpay-paycode">—</div></div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <button class="btn-secondary">Сохранить квитанцию</button>
+            <button class="btn-text-link" onclick="p2Reset()">На главный экран</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- overdue (status 5 — Просрочено) -->
+      <div class="screen" id="p2-screen-overdue">
+        <div class="result-wrap">
+          <div class="result-icon">❌</div>
+          <div class="result-title">Платёж просрочен</div>
+          <div class="result-sub">Срок оплаты истёк. Возможно начисление пеней — уточните в ГНС.</div>
+          <span class="status-badge overdue">Статус 5 — Просрочено</span>
+          <div class="result-details">
+            <div class="info-row"><span class="info-lbl">Сумма долга</span><span class="info-val" style="color:#DC2626;font-weight:700" id="p2-overdue-amount">—</span></div>
+            <div class="info-row"><span class="info-lbl">Последняя дата</span><span class="info-val" id="p2-overdue-date">—</span></div>
+          </div>
+          <div class="code-card" style="width:100%"><div class="cl">Код платежа</div><div class="cv" id="p2-overdue-paycode">—</div></div>
+          <div class="alert err" style="width:100%">❌ &nbsp;Обратитесь в отделение ГНС или позвоните на горячую линию.</div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <button class="btn-primary">Написать в поддержку</button>
+            <button class="btn-text-link" onclick="p2Reset()">На главный экран</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /p2-screens -->
+  </div><!-- /phone2 -->
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   PHONE 1 — Задолженность → Оплата
+══════════════════════════════════════════════════════ */
+const p1 = {
+  current:'loading', history:[],
+  debt:null, debtKey:'', aimakSel:false, rayonTxt:'Октябрьский район', aimakTxt:'', accSel:null,
+  paymentCode:'', transactionId:'',
+  amountRaw:0, amountFmt:'', amountValid:false, remainAmount:0,
+  accounts:{1:24500,2:2100}, lastAppliedTxn:''
+};
+
+const P1_DEBT_STATE = {
+  nds: { total: 6317.37, paid: 4317.37, overdue: false },
+  income: { total: 3200.00, paid: 0.00, overdue: true },
+  vatimport: { total: 2200.00, paid: 1500.00, overdue: true }
+};
+
+function fmtMoney(v) {
+  return v.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₸';
+}
+function roundMoney(v) {
+  return Math.round(v * 100) / 100;
+}
+function p1SetBalanceText(el, amount) {
+  if (!el) return;
+  el.textContent = fmtMoney(Math.max(0, amount));
+  el.className = amount < 3000 ? 'acc-bal low' : 'acc-bal';
+}
+function p1UpdateAccountBalances() {
+  p1SetBalanceText(document.getElementById('p1-acc1-bal'), p1.accounts[1]);
+  p1SetBalanceText(document.getElementById('p1-acc2-bal'), p1.accounts[2]);
+}
+function p1GetDebtRemain(key) {
+  const st = P1_DEBT_STATE[key];
+  return st ? Math.max(0, roundMoney(st.total - st.paid)) : 0;
+}
+function p1SyncDebtData(key) {
+  const remain = p1GetDebtRemain(key);
+  if (!DEBTS[key]) return;
+  DEBTS[key].amountRaw = remain;
+  DEBTS[key].amount = fmtMoney(remain);
+}
+function p1GetDebtStatus(key) {
+  const st = P1_DEBT_STATE[key];
+  if (!st) return 0;
+  const remain = p1GetDebtRemain(key);
+  if (remain <= 0) {
+    if (st.paid > st.total + 0.009) return st.overdue ? 8 : 4;
+    return st.overdue ? 7 : 3;
+  }
+  if (st.paid > 0) return st.overdue ? 6 : 2;
+  return st.overdue ? 5 : 1;
+}
+function p1CardStatusMeta(statusCode) {
+  const map = {
+    0:{txt:'● Новый', cls:'st0'},
+    1:{txt:'● Ожидание оплаты', cls:'st1'},
+    2:{txt:'⚠ Частично оплачено', cls:'st2'},
+    3:{txt:'✓ Оплачен', cls:'st3'},
+    4:{txt:'ℹ Переплата', cls:'st4'},
+    5:{txt:'❌ Просрочено', cls:'st5'},
+    6:{txt:'⚠ Частично + просрочка', cls:'st6'},
+    7:{txt:'⏱ Оплачено с задержкой', cls:'st7'},
+    8:{txt:'ℹ Переплата с задержкой', cls:'st8'}
+  };
+  return map[statusCode] || map[0];
+}
+function p1RenderDebtCard(key) {
+  const st = P1_DEBT_STATE[key];
+  if (!st) return;
+  const statusCode = p1GetDebtStatus(key);
+  const statusMeta = p1CardStatusMeta(statusCode);
+  const total = st.total;
+  const paid = roundMoney(st.paid);
+  const remain = p1GetDebtRemain(key);
+
+  const statusEl = document.getElementById('p1-card-status-' + key);
+  if (statusEl) {
+    statusEl.className = 'dc-status ' + statusMeta.cls;
+    statusEl.textContent = statusMeta.txt;
+  }
+
+  const cardEl = document.getElementById('p1-card-' + key);
+  const btnRowEl = cardEl ? cardEl.querySelector('.pay-btn-row') : null;
+  const canPay = [2,5,6].includes(statusCode);
+  if (cardEl) {
+    cardEl.style.cursor = canPay ? 'pointer' : 'default';
+    cardEl.style.opacity = canPay ? '1' : '0.88';
+    cardEl.onclick = canPay ? () => p1OpenSheet(key) : null;
+  }
+  if (btnRowEl) {
+    btnRowEl.style.display = canPay ? 'block' : 'none';
+  }
+
+  if (key === 'income') {
+    const amountLabel = document.getElementById('p1-card-income-amount-label');
+    const amountVal = document.getElementById('p1-card-income-amount');
+    const notice = document.getElementById('p1-card-income-notice');
+    const btn = document.getElementById('p1-card-income-btn');
+    if (amountLabel) amountLabel.textContent = remain > 0 ? 'Сумма долга' : 'Оплачено';
+    if (amountVal) {
+      amountVal.textContent = fmtMoney(remain > 0 ? remain : paid);
+      amountVal.style.color = remain > 0 ? '#DC2626' : '#059669';
+    }
+    if (notice) {
+      if (statusCode === 7) {
+        notice.textContent = 'Платёж прошёл с задержкой — возможны пени';
+        notice.className = 'dc-notice warn';
+      } else if (remain <= 0) {
+        notice.textContent = 'Задолженность погашена';
+        notice.className = 'dc-notice info';
+      } else {
+        notice.textContent = '⚠ Срок оплаты истёк — возможно начисление пеней';
+        notice.className = 'dc-notice err';
+      }
+    }
+    if (btn) btn.textContent = remain > 0 ? 'Оплатить (возможны пени)' : 'Смотреть результат';
+  }
+
+  if (key === 'nds' || key === 'vatimport') {
+    const prefix = 'p1-card-' + key;
+    const totalEl = document.getElementById(prefix + '-total');
+    const paidEl = document.getElementById(prefix + '-paid');
+    const remainEl = document.getElementById(prefix + '-remain');
+    const btn = document.getElementById(prefix + '-btn');
+    if (totalEl) totalEl.textContent = fmtMoney(total);
+    if (paidEl) paidEl.textContent = fmtMoney(paid);
+    if (remainEl) remainEl.textContent = fmtMoney(remain);
+    if (btn) btn.textContent = remain > 0 ? 'Доплатить остаток' : 'Смотреть результат';
+    if (key === 'vatimport') {
+      const notice = document.getElementById('p1-card-vatimport-notice');
+      if (notice) {
+        if (statusCode === 7 || statusCode === 8) {
+          notice.textContent = 'Платёж погашен, но с задержкой — возможны пени';
+        } else if (remain <= 0) {
+          notice.textContent = 'Задолженность погашена';
+        } else {
+          notice.textContent = '⚠ Частичная оплата прошла позже срока — возможны пени';
+        }
+      }
+    }
+  }
+
+  p1SyncDebtData(key);
+}
+function p1RenderAllDebtCards() {
+  ['nds','income','vatimport'].forEach(p1RenderDebtCard);
+}
+function p1GetAutoStatus() {
+  const key = p1.debtKey;
+  const st = P1_DEBT_STATE[key];
+  if (!st) return 3;
+  const incoming = Math.max(0, p1.amountRaw);
+  if (incoming <= 0) return st.overdue ? 5 : 1;
+  const projectedPaid = roundMoney(st.paid + incoming);
+  if (projectedPaid < st.total - 0.009) return st.overdue ? 6 : 2;
+  if (projectedPaid > st.total + 0.009) return st.overdue ? 8 : 4;
+  return st.overdue ? 7 : 3;
+}
+function p1ApplyStatusEffects(statusCode) {
+  if (![2,3,4,6,7,8].includes(statusCode)) return;
+  if (!p1.transactionId || p1.lastAppliedTxn === p1.transactionId) return;
+  const amount = Math.max(0, p1.amountRaw);
+  if (p1.accSel && p1.accounts[p1.accSel] !== undefined) {
+    p1.accounts[p1.accSel] = roundMoney(Math.max(0, p1.accounts[p1.accSel] - amount));
+    p1UpdateAccountBalances();
+  }
+  if (p1.debtKey && P1_DEBT_STATE[p1.debtKey]) {
+    P1_DEBT_STATE[p1.debtKey].paid = roundMoney(P1_DEBT_STATE[p1.debtKey].paid + amount);
+    p1RenderDebtCard(p1.debtKey);
+  }
+  p1.lastAppliedTxn = p1.transactionId;
+}
+const DEBTS = {
+  nds:         { taxName:'Налог на добавленную стоимость', taxCode:'1040', kbk:'10400100', kbkName:'НДС на товары и услуги',  rayon:'Октябрьский район',  amount:'2 000.00 ₸', amountRaw:2000.00, tin:'12345678901234', period:'Январь–Декабрь 2025' },
+  income:      { taxName:'Налог на прибыль организаций',   taxCode:'1010', kbk:'10100101', kbkName:'Налог на прибыль орг.',   rayon:'Первомайский район', amount:'3 200.00 ₸', amountRaw:3200.00, tin:'12345678901234', period:'Январь–Сентябрь 2025' },
+  vatimport:   { taxName:'Подоходный налог с физических лиц', taxCode:'1010', kbk:'10100201', kbkName:'НДФЛ с физлиц',       rayon:'Октябрьский район',  amount:'700.00 ₸',   amountRaw:700.00,  tin:'12345678901234', period:'Январь–Апрель 2026' }
+};
+
+function p1Show(id) {
+  document.querySelectorAll('#p1-screens .screen').forEach(s => {
+    if (s.classList.contains('active')) { s.classList.remove('active'); s.classList.add('exit'); setTimeout(()=>s.classList.remove('exit'),350); }
+  });
+  document.getElementById('p1-screen-'+id).classList.add('active');
+  p1.current = id;
+  const noMain = ['form','paycode','accounts','confirm','processing','success','partial','overpay','overdue'].includes(id);
+  document.getElementById('p1-mainHeader').style.display = noMain ? 'none' : 'flex';
+}
+function p1Navigate(id) { p1.history.push(p1.current); p1Show(id); }
+function p1GoBack()     { if(p1.history.length) p1Show(p1.history.pop()); }
+
+function p1OpenSheet(key) {
+  const d = DEBTS[key]; p1.debt = d; p1.debtKey = key;
+  document.getElementById('p1-bs-title').textContent = d.taxName;
+  document.getElementById('p1-bs-rayon').textContent = d.rayon;
+  document.getElementById('p1-bs-body').innerHTML = `
+    <div class="bs-tax-block">
+      <div class="bs-row"><span class="bs-label">Код налога</span><span class="bs-value"><span class="kbk-tag">${d.taxCode}</span></span></div>
+      <div class="bs-divider"></div>
+      <div class="bs-row"><span class="bs-label">КБК</span><span class="bs-value"><span class="kbk-tag">${d.kbk}</span></span></div>
+      <div class="bs-row"><span class="bs-label">Раздел бюджета</span><span class="bs-value">${d.kbkName}</span></div>
+      <div class="bs-divider"></div>
+      <div class="bs-row"><span class="bs-label">Период</span><span class="bs-value">${d.period}</span></div>
+      <div class="bs-row"><span class="bs-label">ИНН</span><span class="bs-value">${d.tin}</span></div>
+      <div class="bs-row"><span class="bs-label">Данные от</span><span class="bs-value">25.05.2026</span></div>
+    </div>
+    <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:14px;padding:16px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:14px;color:#991B1B;font-weight:600">Итого к оплате</span>
+      <span class="bs-amount-big">${d.amount}</span>
+    </div>
+    <div class="alert">ℹ️ &nbsp;Данные будут перенесены в форму автоматически. Потребуется только выбрать аймак.</div>`;
+  document.getElementById('p1-overlay').classList.add('show');
+  document.getElementById('p1-bottomSheet').classList.add('show');
+}
+function p1CloseSheet() {
+  document.getElementById('p1-overlay').classList.remove('show');
+  document.getElementById('p1-bottomSheet').classList.remove('show');
+}
+function p1GoToPayment() {
+  p1CloseSheet();
+  const d = p1.debt;
+  p1.aimakSel = false; p1.rayonTxt = d.rayon; p1.aimakTxt = '';
+  p1.amountRaw = d.amountRaw; p1.amountValid = true;
+  p1.amountFmt = d.amount;
+  document.getElementById('p1-f-taxName').textContent = d.taxName;
+  document.getElementById('p1-f-kbk').textContent = d.kbk + ' — ' + d.kbkName;
+  document.getElementById('p1-amount-input').value = d.amountRaw;
+  document.getElementById('p1-debt-hint').textContent = 'Задолженность: ' + d.amount;
+  document.getElementById('p1-amountError').style.display = 'none';
+  document.getElementById('p1-f-rayon-text').textContent = d.rayon;
+  document.getElementById('p1-f-rayon').className = 'field-val filled';
+  document.getElementById('p1-f-aimak').className = 'field-val err';
+  document.getElementById('p1-f-aimak-text').textContent = 'Выберите аймак';
+  document.getElementById('p1-f-aimak-text').style.color = '#9CA3AF';
+  document.getElementById('p1-aimakError').style.display = 'block';
+  document.getElementById('p1-btnFormNext').className = 'btn-primary disabled';
+  document.querySelectorAll('#p1-dd-aimak .dd-item').forEach(i=>{i.classList.remove('active');i.querySelector('.dd-check').textContent='';});
+  p1Navigate('form');
+}
+
+function p1CheckFormAmount() {
+  const val = parseFloat(document.getElementById('p1-amount-input').value) || 0;
+  p1.amountRaw = val;
+  p1.amountValid = val > 0;
+  const inp = document.getElementById('p1-amount-input');
+  inp.className = val > 0 ? 'amount-input' : (inp.value ? 'amount-input err' : 'amount-input');
+  document.getElementById('p1-amountError').style.display = (inp.value && val <= 0) ? 'block' : 'none';
+  if (val > 0) {
+    p1.amountFmt = val.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₸';
+  }
+  p1CheckFormValid();
+}
+function p1CheckFormValid() {
+  const ok = p1.aimakSel && p1.amountValid;
+  document.getElementById('p1-btnFormNext').className = ok ? 'btn-primary' : 'btn-primary disabled';
+}
+function p1FillFullAmount() {
+  if (!p1.debt) return;
+  document.getElementById('p1-amount-input').value = p1.debt.amountRaw;
+  p1CheckFormAmount();
+}
+function p1ToggleDd(id) {
+  const dd = document.getElementById(id);
+  const open = dd.classList.contains('open');
+  document.querySelectorAll('#p1-screens .dropdown-list').forEach(d=>d.classList.remove('open'));
+  if (!open) dd.classList.add('open');
+}
+function p1SelectRayon(name, el) {
+  document.querySelectorAll('#p1-dd-rayon .dd-item').forEach(i=>{i.classList.remove('active');i.querySelector('.dd-check').textContent='';});
+  el.classList.add('active'); el.querySelector('.dd-check').textContent='✓';
+  document.getElementById('p1-f-rayon-text').textContent = name;
+  document.getElementById('p1-f-rayon').className = 'field-val filled';
+  p1.rayonTxt = name; p1.aimakSel = false;
+  document.getElementById('p1-f-aimak').className = 'field-val err';
+  document.getElementById('p1-f-aimak-text').textContent = 'Выберите аймак';
+  document.getElementById('p1-f-aimak-text').style.color='#9CA3AF';
+  document.getElementById('p1-aimakError').style.display = 'block';
+  document.querySelectorAll('#p1-dd-aimak .dd-item').forEach(i=>{i.classList.remove('active');i.querySelector('.dd-check').textContent='';});
+  document.getElementById('p1-btnFormNext').className = 'btn-primary disabled';
+  document.getElementById('p1-dd-rayon').classList.remove('open');
+}
+function p1SelectAimak(name, el) {
+  document.querySelectorAll('#p1-dd-aimak .dd-item').forEach(i=>{i.classList.remove('active');i.querySelector('.dd-check').textContent='';});
+  el.classList.add('active'); el.querySelector('.dd-check').textContent='✓';
+  document.getElementById('p1-f-aimak-text').textContent = name;
+  document.getElementById('p1-f-aimak-text').style.color='#1A1A2E';
+  document.getElementById('p1-f-aimak').className = 'field-val filled';
+  document.getElementById('p1-aimakError').style.display='none';
+  document.getElementById('p1-dd-aimak').classList.remove('open');
+  p1.aimakTxt = name; p1.aimakSel = true;
+  p1CheckFormValid();
+}
+function p1GoToAccounts() {
+  if(!p1.aimakSel || !p1.amountValid) return;
+  p1.paymentCode = 'PMT-' + Date.now().toString().slice(-8);
+  p1.transactionId = 'txn-' + Math.random().toString(36).slice(2,10).toUpperCase();
+  p1Navigate('paycode');
+  animatePaycode('p1', p1.paymentCode, ()=>{
+    document.getElementById('p1-acc-amount').textContent = p1.amountFmt;
+    document.getElementById('p1-paycode-display').textContent = p1.paymentCode;
+    p1UpdateAccountBalances();
+    p1.accSel = null;
+    ['p1-acc1','p1-acc2'].forEach(id=>document.getElementById(id).className='account-card');
+    ['p1-r1','p1-r2'].forEach(id=>document.getElementById(id).className='radio-dot');
+    document.getElementById('p1-accError').style.display='none';
+    document.getElementById('p1-btnAccNext').className='btn-primary disabled';
+    /* paycode — транзитный экран, не добавляем в стек; back из accounts → form */
+    p1.history.pop(); // убираем 'form' из стека, чтобы не было paycode между form и accounts
+    p1.history.push('form');
+    p1Show('accounts');
+  });
+}
+function p1SelectAcc(n) {
+  p1.accSel = n;
+  const insuf = p1.amountRaw > (p1.accounts[n] || 0);
+  ['p1-acc1','p1-acc2'].forEach((id,i)=>{
+    document.getElementById(id).className = i+1===n ? (insuf?'account-card err':'account-card sel') : 'account-card';
+    document.getElementById('p1-r'+(i+1)).className = i+1===n ? (insuf?'radio-dot err':'radio-dot on') : 'radio-dot';
+  });
+  document.getElementById('p1-accError').style.display = insuf ? 'block' : 'none';
+  document.getElementById('p1-btnAccNext').className = insuf ? 'btn-primary disabled' : 'btn-primary';
+}
+function p1GoToConfirm() {
+  if(!p1.accSel || p1.amountRaw > (p1.accounts[p1.accSel] || 0)) return;
+  const d = p1.debt;
+  const acc = p1.accSel===1 ? 'Расчётный счёт · KGZ ●●● 4821' : 'Сберегательный · KGZ ●●● 5512';
+  document.getElementById('p1-conf-amount').textContent   = p1.amountFmt;
+  document.getElementById('p1-conf-taxname').textContent  = d.taxName;
+  document.getElementById('p1-conf-inn').textContent      = d.tin;
+  document.getElementById('p1-conf-kbk').textContent      = d.kbk + ' — ' + d.kbkName;
+  document.getElementById('p1-conf-rayon').textContent    = p1.rayonTxt;
+  document.getElementById('p1-conf-aimak').textContent    = p1.aimakTxt;
+  document.getElementById('p1-conf-acc').textContent      = acc;
+  document.getElementById('p1-conf-paycode').textContent  = p1.paymentCode;
+  document.getElementById('p1-conf-total').textContent    = p1.amountFmt;
+  p1Navigate('confirm');
+}
+let _p1timer = null;
+
+function p1GoToProcessing() {
+  if (_p1timer) { clearTimeout(_p1timer); _p1timer = null; }
+  p1Navigate('processing');
+  const autoStatus = p1GetAutoStatus();
+  _p1timer = setTimeout(()=>p1ForceStatus(autoStatus), 1800);
+}
+
+function p1ForceStatus(statusCode) {
+  if (_p1timer) { clearTimeout(_p1timer); _p1timer = null; }
+
+  const now = new Date().toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const d   = p1.debt;
+  const fmt = v => v.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₸';
+
+  const LABELS = {
+    2:'Статус 2 — Частично оплачено',
+    3:'Статус 3 — Оплачен',
+    4:'Статус 4 — Переплачено',
+    5:'Статус 5 — Просрочено',
+    6:'Статус 6 — Частичная оплата с задержкой',
+    7:'Статус 7 — Оплачено с задержкой',
+    8:'Статус 8 — Переплата с задержкой'
+  };
+  const label = LABELS[statusCode] || ('Статус ' + statusCode);
+  p1ApplyStatusEffects(statusCode);
+
+  if (statusCode === 3 || statusCode === 7) {
+    const delayed = statusCode === 7;
+    document.getElementById('p1-res-title').textContent   = delayed ? 'Оплачено с задержкой' : 'Оплачено успешно';
+    document.getElementById('p1-res-sub').textContent     = delayed ? 'Платёж зарегистрирован с задержкой' : 'Платёж зарегистрирован в ГНС';
+    document.getElementById('p1-res-badge').textContent   = label;
+    document.getElementById('p1-res-badge').className     = 'status-badge ' + (delayed ? 'delayed' : 'ok');
+    document.getElementById('p1-res-amount').textContent  = p1.amountFmt;
+    document.getElementById('p1-res-date').textContent    = now;
+    document.getElementById('p1-res-paycode').textContent = p1.paymentCode;
+    p1Navigate('success');
+
+  } else if (statusCode === 2 || statusCode === 6) {
+    const debtRaw = d ? d.amountRaw : p1.amountRaw;
+    const paid    = p1.amountRaw;
+    const remain  = Math.max(0, debtRaw - paid);
+    p1.remainAmount = remain;
+    const delayed = statusCode === 6;
+    document.getElementById('p1-partial-title').textContent   = delayed ? 'Частичная оплата с задержкой' : 'Частичная оплата';
+    document.getElementById('p1-partial-badge').textContent   = label;
+    document.getElementById('p1-partial-badge').className     = 'status-badge partial';
+    document.getElementById('p1-partial-paid').textContent    = fmt(paid);
+    document.getElementById('p1-partial-remain').textContent  = fmt(remain);
+    document.getElementById('p1-partial-date').textContent    = now;
+    document.getElementById('p1-partial-paycode').textContent = p1.paymentCode;
+    p1Navigate('partial');
+
+  } else if (statusCode === 4 || statusCode === 8) {
+    const debtRaw = d ? d.amountRaw : 0;
+    const extra = debtRaw > 0 ? Math.max(0, roundMoney(p1.amountRaw - debtRaw)) : null;
+    const delayed = statusCode === 8;
+    document.getElementById('p1-overpay-title').textContent   = delayed ? 'Переплата с задержкой' : 'Переплата';
+    document.getElementById('p1-overpay-badge').textContent   = label;
+    document.getElementById('p1-overpay-badge').className     = 'status-badge overpay';
+    document.getElementById('p1-overpay-paid').textContent    = p1.amountFmt;
+    document.getElementById('p1-overpay-extra').textContent   = extra === null ? 'Уточните в ГНС' : fmt(extra);
+    document.getElementById('p1-overpay-date').textContent    = now;
+    document.getElementById('p1-overpay-paycode').textContent = p1.paymentCode;
+    p1Navigate('overpay');
+
+  } else if (statusCode === 5) {
+    document.getElementById('p1-overdue-amount').textContent  = p1.amountFmt;
+    document.getElementById('p1-overdue-date').textContent    = now;
+    document.getElementById('p1-overdue-paycode').textContent = p1.paymentCode;
+    p1Navigate('overdue');
+  }
+}
+
+function p1PayRemainder() {
+  /* Возврат на форму для доплаты остатка задолженности */
+  const d = p1.debt;
+  const remain = p1.remainAmount > 0 ? p1.remainAmount : d.amountRaw;
+  p1.history = []; p1.aimakSel = false; p1.aimakTxt = '';
+  p1.amountRaw = remain; p1.amountValid = true;
+  p1.amountFmt = remain.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₸';
+  document.getElementById('p1-f-taxName').textContent       = d.taxName;
+  document.getElementById('p1-f-kbk').textContent           = d.kbk + ' — ' + d.kbkName;
+  document.getElementById('p1-amount-input').value          = remain.toFixed(2);
+  document.getElementById('p1-debt-hint').textContent       = 'Задолженность: ' + d.amount;
+  document.getElementById('p1-amountError').style.display   = 'none';
+  document.getElementById('p1-f-rayon-text').textContent    = d.rayon;
+  document.getElementById('p1-f-rayon').className           = 'field-val filled';
+  document.getElementById('p1-f-aimak').className           = 'field-val err';
+  document.getElementById('p1-f-aimak-text').textContent    = 'Выберите аймак';
+  document.getElementById('p1-f-aimak-text').style.color    = '#9CA3AF';
+  document.getElementById('p1-aimakError').style.display    = 'block';
+  document.getElementById('p1-btnFormNext').className       = 'btn-primary disabled';
+  document.querySelectorAll('#p1-dd-aimak .dd-item').forEach(i=>{i.classList.remove('active');i.querySelector('.dd-check').textContent='';});
+  p1Show('form');
+}
+function p1Reset() {
+  p1.history=[]; p1.accSel=null; p1.aimakSel=false;
+  p1.paymentCode=''; p1.transactionId='';
+  p1.amountRaw=0; p1.amountFmt=''; p1.amountValid=false; p1.remainAmount=0;
+  const inp = document.getElementById('p1-amount-input');
+  if (inp) inp.value = '';
+  p1Show('debts');
+}
+
+window.addEventListener('load', ()=>{
+  p1UpdateAccountBalances();
+  p1RenderAllDebtCards();
+  document.getElementById('p1-headerBadge').style.display='inline-block';
+  setTimeout(()=>{ p1.history=['loading']; p1Show('debts'); }, 1800);
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('#p1-screens .dropdown-wrap'))
+      document.querySelectorAll('#p1-screens .dropdown-list').forEach(d=>d.classList.remove('open'));
+  });
+});
+
+/* ══════════════════════════════════════════════════════
+   PHONE 2 — Самостоятельная оплата
+══════════════════════════════════════════════════════ */
+const p2 = {
+  current:'home', history:[],
+  rayonSel:false, aimakSel:false, aimakRequired:true,
+  taxSel:false, kbkSel:false, amountValid:false,
+  rayonTxt:'', aimakTxt:'Не требуется', taxTxt:'', taxCode:'', kbkTxt:'', kbkCode:'',
+  debtKey:'', accSel:null, amountRaw:0, amountFmt:'', paymentCode:'', remainAmount:0,
+  targetDebtRaw:null, transactionId:'', accounts:{1:24500,2:2100}, lastAppliedTxn:''
+};
+
+const P2_DEBT_STATE = {
+  income: { total: 3200.00, paid: 0.00, overdue: true },
+  nds: { total: 6317.37, paid: 4317.37, overdue: false }
+};
+
+function p2SetBalanceText(el, amount) {
+  if (!el) return;
+  el.textContent = fmtMoney(Math.max(0, amount));
+  el.className = amount < 3000 ? 'acc-bal low' : 'acc-bal';
+}
+function p2UpdateAccountBalances() {
+  p2SetBalanceText(document.getElementById('p2-form-acc1-bal'), p2.accounts[1]);
+  p2SetBalanceText(document.getElementById('p2-form-acc2-bal'), p2.accounts[2]);
+  p2SetBalanceText(document.getElementById('p2-acc1-bal'), p2.accounts[1]);
+  p2SetBalanceText(document.getElementById('p2-acc2-bal'), p2.accounts[2]);
+}
+
+function p2GetDebtRemain(key) {
+  const st = P2_DEBT_STATE[key];
+  return st ? Math.max(0, roundMoney(st.total - st.paid)) : 0;
+}
+
+function p2GetDebtStatus(key) {
+  const st = P2_DEBT_STATE[key];
+  if (!st) return 0;
+  const remain = p2GetDebtRemain(key);
+  if (remain <= 0) {
+    if (st.paid > st.total + 0.009) return st.overdue ? 8 : 4;
+    return st.overdue ? 7 : 3;
+  }
+  if (st.paid > 0) return st.overdue ? 6 : 2;
+  return st.overdue ? 5 : 1;
+}
+
+function p2CardStatusMeta(statusCode) {
+  const map = {
+    0:{txt:'● Новый', cls:'st0'},
+    1:{txt:'● Ожидание оплаты', cls:'st1'},
+    2:{txt:'⚠ Частично оплачено', cls:'st2'},
+    3:{txt:'✓ Оплачен', cls:'st3'},
+    4:{txt:'ℹ Переплата', cls:'st4'},
+    5:{txt:'❌ Просрочено', cls:'st5'},
+    6:{txt:'⚠ Частично + просрочка', cls:'st6'},
+    7:{txt:'⏱ Оплачено с задержкой', cls:'st7'},
+    8:{txt:'ℹ Переплата с задержкой', cls:'st8'}
+  };
+  return map[statusCode] || map[0];
+}
+
+function p2RenderDebtCard(key) {
+  const st = P2_DEBT_STATE[key];
+  if (!st) return;
+
+  const statusCode = p2GetDebtStatus(key);
+  const statusMeta = p2CardStatusMeta(statusCode);
+  const total = st.total;
+  const paid = roundMoney(st.paid);
+  const remain = p2GetDebtRemain(key);
+  const canPay = [2,5,6].includes(statusCode);
+
+  document.querySelectorAll('.p2-debt-' + key).forEach((cardEl) => {
+    const statusEl = cardEl.querySelector('.dc-status');
+    if (statusEl) {
+      statusEl.className = 'dc-status ' + statusMeta.cls;
+      statusEl.textContent = statusMeta.txt;
+    }
+
+    cardEl.style.cursor = canPay ? 'pointer' : 'default';
+    cardEl.style.opacity = canPay ? '1' : '0.88';
+    cardEl.onclick = canPay ? () => p2StartDebtFlow(key) : null;
+
+    const btnRowEl = cardEl.querySelector('.pay-btn-row');
+    if (btnRowEl) btnRowEl.style.display = canPay ? 'block' : 'none';
+
+    if (key === 'income') {
+      const amountLabelEl = cardEl.querySelector('.amount-row .amount-label');
+      const amountValEl = cardEl.querySelector('.amount-row .amount');
+      const noticeEl = cardEl.querySelector('.dc-notice');
+
+      if (amountLabelEl) amountLabelEl.textContent = remain > 0 ? 'Сумма долга' : 'Оплачено';
+      if (amountValEl) {
+        amountValEl.textContent = fmtMoney(remain > 0 ? remain : paid);
+        amountValEl.style.color = remain > 0 ? '#DC2626' : '#059669';
+      }
+      if (noticeEl) {
+        if (statusCode === 7) {
+          noticeEl.textContent = 'Платёж прошёл с задержкой — возможны пени';
+          noticeEl.className = 'dc-notice warn';
+        } else if (remain <= 0) {
+          noticeEl.textContent = 'Задолженность погашена';
+          noticeEl.className = 'dc-notice info';
+        } else {
+          noticeEl.textContent = '⚠ Срок оплаты истёк — возможно начисление пеней';
+          noticeEl.className = 'dc-notice err';
+        }
+      }
+    }
+
+    if (key === 'nds') {
+      const totalEl = cardEl.querySelector('.dc-total-val');
+      const splitVals = cardEl.querySelectorAll('.dc-split .dsc-val');
+      if (totalEl) totalEl.textContent = fmtMoney(total);
+      if (splitVals.length >= 2) {
+        splitVals[0].textContent = fmtMoney(paid);
+        splitVals[1].textContent = fmtMoney(remain);
+      }
+    }
+  });
+
+  if (P2_DEBTS[key]) P2_DEBTS[key].amountRaw = remain;
+}
+
+function p2RenderAllDebtCards() {
+  ['income','nds'].forEach(p2RenderDebtCard);
+}
+
+function p2GetAutoStatus() {
+  if (p2.debtKey && P2_DEBT_STATE[p2.debtKey]) {
+    const st = P2_DEBT_STATE[p2.debtKey];
+    const incoming = Math.max(0, p2.amountRaw);
+    const projectedPaid = roundMoney(st.paid + incoming);
+    if (projectedPaid < st.total - 0.009) return st.overdue ? 6 : 2;
+    if (projectedPaid > st.total + 0.009) return st.overdue ? 8 : 4;
+    return st.overdue ? 7 : 3;
+  }
+  const target = p2.targetDebtRaw || p2.amountRaw;
+  if (!target || target <= 0) return 3;
+  if (p2.amountRaw < target - 0.009) return 2;
+  if (p2.amountRaw > target + 0.009) return 4;
+  return 3;
+}
+function p2ApplyStatusEffects(statusCode, chargedAmount) {
+  if (![2,3,4,6,7,8].includes(statusCode)) return;
+  if (!p2.transactionId || p2.lastAppliedTxn === p2.transactionId) return;
+  const amount = Math.max(0, chargedAmount || 0);
+  if (p2.accSel && p2.accounts[p2.accSel] !== undefined) {
+    p2.accounts[p2.accSel] = roundMoney(Math.max(0, p2.accounts[p2.accSel] - amount));
+    p2UpdateAccountBalances();
+  }
+  if (p2.debtKey && P2_DEBT_STATE[p2.debtKey]) {
+    P2_DEBT_STATE[p2.debtKey].paid = roundMoney(P2_DEBT_STATE[p2.debtKey].paid + amount);
+    p2RenderDebtCard(p2.debtKey);
+  }
+  p2.lastAppliedTxn = p2.transactionId;
+}
+
+const KBK_MAP = {
+  '1040': [
+    {code:'10400100', name:'НДС на товары и услуги'},
+    {code:'10400200', name:'НДС на импортируемые товары'}
+  ],
+  '1010': [
+    {code:'10100101', name:'Налог на прибыль организаций'},
+    {code:'10100102', name:'Налог на прибыль ИП'}
+  ],
+  '1050': [
+    {code:'10500100', name:'Налог на имущество организаций'},
+    {code:'10500200', name:'Налог на имущество физ. лиц'}
+  ],
+  '1020': [
+    {code:'10200100', name:'НДФЛ с доходов по найму'},
+    {code:'10200200', name:'НДФЛ с прочих доходов'}
+  ],
+  '1060': [
+    {code:'10600100', name:'Земельный налог с организаций'},
+    {code:'10600200', name:'Земельный налог с физ. лиц'}
+  ]
+};
+
+const P2_DEBTS = {
+  income: {
+    rayonTxt: 'Первомайский район',
+    aimakRequired: false,
+    aimakTxt: 'Не требуется',
+    taxTxt: 'Налог на прибыль',
+    taxCode: '1010',
+    kbkCode: '10100101',
+    kbkTxt: 'Налог на прибыль организаций',
+    amountRaw: 3200.00
+  },
+  nds: {
+    rayonTxt: 'Октябрьский район',
+    aimakRequired: true,
+    aimakTxt: 'Аламединский аймак',
+    taxTxt: 'НДС',
+    taxCode: '1040',
+    kbkCode: '10400100',
+    kbkTxt: 'НДС на товары и услуги',
+    amountRaw: 2000.00
+  }
+};
+
+function p2Show(id) {
+  document.querySelectorAll('#p2-screens .screen').forEach(s=>{
+    if(s.classList.contains('active')){ s.classList.remove('active'); s.classList.add('exit'); setTimeout(()=>s.classList.remove('exit'),350); }
+  });
+  document.getElementById('p2-screen-'+id).classList.add('active');
+  p2.current = id;
+  const noMain=['form','paycode','accounts','confirm','processing','success','debts-preview','partial','overpay','overdue'].includes(id);
+  document.getElementById('p2-mainHeader').style.display = noMain ? 'none' : 'flex';
+}
+function p2Navigate(id){ p2.history.push(p2.current); p2Show(id); }
+function p2GoBack(){     if(p2.history.length) p2Show(p2.history.pop()); }
+
+function p2ToggleDd(id){
+  const dd=document.getElementById(id);
+  const open=dd.classList.contains('open');
+  document.querySelectorAll('#p2-screens .dropdown-list').forEach(d=>d.classList.remove('open'));
+  if(!open) dd.classList.add('open');
+}
+function p2CheckForm(){
+  const amt = parseFloat(document.getElementById('p2-amount-input').value)||0;
+  p2.amountRaw = amt;
+  p2.amountValid = amt > 0;
+  document.getElementById('p2-amountError').style.display = (amt<=0&&document.getElementById('p2-amount-input').value) ? 'block' : 'none';
+  const insuf = p2.accSel ? amt > (p2.accounts[p2.accSel] || 0) : false;
+  if (p2.accSel) {
+    ['p2-form-acc1','p2-form-acc2'].forEach((id,i)=>{
+      document.getElementById(id).className = i+1===p2.accSel ? (insuf?'account-card err':'account-card sel') : 'account-card';
+      document.getElementById('p2-form-r'+(i+1)).className = i+1===p2.accSel ? (insuf?'radio-dot err':'radio-dot on') : 'radio-dot';
+    });
+    document.getElementById('p2-accFormError').style.display = insuf ? 'block' : 'none';
+  }
+  const ok = p2.rayonSel && (!p2.aimakRequired || p2.aimakSel) && p2.taxSel && p2.kbkSel && p2.amountValid && p2.accSel && !insuf;
+  document.getElementById('p2-btnFormNext').className = ok ? 'btn-primary' : 'btn-primary disabled';
+}
+
+function p2FormSelectAcc(n){
+  p2.accSel = n;
+  const insuf = p2.amountRaw > (p2.accounts[n] || 0);
+  ['p2-form-acc1','p2-form-acc2'].forEach((id,i)=>{
+    document.getElementById(id).className = i+1===n ? (insuf?'account-card err':'account-card sel') : 'account-card';
+    document.getElementById('p2-form-r'+(i+1)).className = i+1===n ? (insuf?'radio-dot err':'radio-dot on') : 'radio-dot';
+  });
+  document.getElementById('p2-accFormError').style.display = insuf ? 'block' : 'none';
+  p2CheckForm();
+}
+
+function p2SelectRayon(name, el){
+  document.querySelectorAll('#p2-dd-rayon .dd-item').forEach(i=>{i.classList.remove('active');i.querySelector('.dd-check').textContent='';});
+  el.classList.add('active'); el.querySelector('.dd-check').textContent='✓';
+  document.getElementById('p2-f-rayon-text').textContent=name;
+  document.getElementById('p2-f-rayon-text').style.color='#1A1A2E';
+  document.getElementById('p2-f-rayon').className='field-val filled';
+  document.getElementById('p2-dd-rayon').classList.remove('open');
+  document.getElementById('p2-rayonError').style.display='none';
+  p2.rayonSel=true; p2.rayonTxt=name;
+
+  // Show/hide aimak based on rayon
+  const needAimak = name !== 'Первомайский район';
+  p2.aimakRequired = needAimak;
+  const ag = document.getElementById('p2-aimakGroup');
+  ag.style.display = needAimak ? 'flex' : 'none';
+  if(!needAimak){ p2.aimakSel=true; p2.aimakTxt='Не требуется'; }
+  else { p2.aimakSel=false; }
+
+  // Unlock tax dropdown
+  document.getElementById('p2-f-tax').style.opacity='1';
+  document.getElementById('p2-f-tax').style.pointerEvents='all';
+  p2CheckForm();
+}
+
+function p2SelectAimak(name, el){
+  document.querySelectorAll('#p2-dd-aimak .dd-item').forEach(i=>{i.classList.remove('active');i.querySelector('.dd-check').textContent='';});
+  el.classList.add('active'); el.querySelector('.dd-check').textContent='✓';
+  document.getElementById('p2-f-aimak-text').textContent=name;
+  document.getElementById('p2-f-aimak-text').style.color='#1A1A2E';
+  document.getElementById('p2-f-aimak').className='field-val filled';
+  document.getElementById('p2-aimakError').style.display='none';
+  document.getElementById('p2-dd-aimak').classList.remove('open');
+  p2.aimakSel=true; p2.aimakTxt=name;
+  p2CheckForm();
+}
+
+function p2SelectTax(name, code, el){
+  document.querySelectorAll('#p2-dd-tax .dd-item').forEach(i=>{i.classList.remove('active');i.querySelector('.dd-check').textContent='';});
+  el.classList.add('active'); el.querySelector('.dd-check').textContent='✓';
+  document.getElementById('p2-f-tax-text').textContent=name+' ('+code+')';
+  document.getElementById('p2-f-tax-text').style.color='#1A1A2E';
+  document.getElementById('p2-f-tax').className='field-val filled';
+  document.getElementById('p2-dd-tax').classList.remove('open');
+  p2.taxSel=true; p2.taxTxt=name; p2.taxCode=code;
+
+  // Fill KBK dropdown
+  const kbkList = KBK_MAP[code]||[];
+  const ddKbk = document.getElementById('p2-dd-kbk');
+  ddKbk.innerHTML = kbkList.map(k=>
+    `<div class="dd-item" onclick="p2SelectKbk('${k.code}','${k.name}',this)"><span class="dd-check"></span><div><div>${k.name}</div><div class="dd-sub">КБК: ${k.code}</div></div></div>`
+  ).join('');
+  // Reset KBK
+  p2.kbkSel=false; p2.kbkCode=''; p2.kbkTxt='';
+  document.getElementById('p2-f-kbk-text').textContent='Выберите КБК';
+  document.getElementById('p2-f-kbk-text').style.color='#9CA3AF';
+  document.getElementById('p2-f-kbk').className='field-val';
+  document.getElementById('p2-f-kbk').style.opacity='1';
+  document.getElementById('p2-f-kbk').style.pointerEvents='all';
+
+  // Unlock amount
+  document.getElementById('p2-amount-input').style.opacity='1';
+  document.getElementById('p2-amount-input').style.pointerEvents='all';
+  p2CheckForm();
+}
+
+function p2SelectKbk(code, name, el){
+  document.querySelectorAll('#p2-dd-kbk .dd-item').forEach(i=>{i.classList.remove('active');i.querySelector('.dd-check').textContent='';});
+  el.classList.add('active'); el.querySelector('.dd-check').textContent='✓';
+  document.getElementById('p2-f-kbk-text').textContent=code+' — '+name;
+  document.getElementById('p2-f-kbk-text').style.color='#1A1A2E';
+  document.getElementById('p2-f-kbk').className='field-val filled';
+  document.getElementById('p2-dd-kbk').classList.remove('open');
+  p2.kbkSel=true; p2.kbkCode=code; p2.kbkTxt=name;
+  p2CheckForm();
+}
+
+function p2StartDebtFlow(debtKey){
+  const d = P2_DEBTS[debtKey];
+  if(!d) return;
+  p2.debtKey = debtKey;
+
+  p2.history = ['home'];
+  p2Show('form');
+
+  // Rayon
+  p2.rayonSel = true;
+  p2.rayonTxt = d.rayonTxt;
+  document.getElementById('p2-f-rayon-text').textContent = d.rayonTxt;
+  document.getElementById('p2-f-rayon-text').style.color = '#1A1A2E';
+  document.getElementById('p2-f-rayon').className = 'field-val filled';
+  document.getElementById('p2-rayonError').style.display = 'none';
+  document.querySelectorAll('#p2-dd-rayon .dd-item').forEach((item)=>{
+    const selected = item.textContent.includes(d.rayonTxt);
+    item.classList.toggle('active', selected);
+    item.querySelector('.dd-check').textContent = selected ? '✓' : '';
+  });
+
+  // Aimak
+  p2.aimakRequired = d.aimakRequired;
+  const aimakGroup = document.getElementById('p2-aimakGroup');
+  aimakGroup.style.display = d.aimakRequired ? 'flex' : 'none';
+  if(d.aimakRequired){
+    p2.aimakSel = true;
+    p2.aimakTxt = d.aimakTxt;
+    document.getElementById('p2-f-aimak-text').textContent = d.aimakTxt;
+    document.getElementById('p2-f-aimak-text').style.color = '#1A1A2E';
+    document.getElementById('p2-f-aimak').className = 'field-val filled';
+    document.getElementById('p2-aimakError').style.display = 'none';
+    document.querySelectorAll('#p2-dd-aimak .dd-item').forEach((item)=>{
+      const selected = item.textContent.includes(d.aimakTxt);
+      item.classList.toggle('active', selected);
+      item.querySelector('.dd-check').textContent = selected ? '✓' : '';
+    });
+  } else {
+    p2.aimakSel = true;
+    p2.aimakTxt = 'Не требуется';
+    document.getElementById('p2-f-aimak-text').textContent = 'Не требуется';
+    document.getElementById('p2-f-aimak-text').style.color = '#9CA3AF';
+    document.getElementById('p2-f-aimak').className = 'field-val readonly';
+    document.getElementById('p2-aimakError').style.display = 'none';
+  }
+
+  // Unlock tax/kbk/amount
+  document.getElementById('p2-f-tax').style.opacity = '1';
+  document.getElementById('p2-f-tax').style.pointerEvents = 'all';
+  document.getElementById('p2-f-kbk').style.opacity = '1';
+  document.getElementById('p2-f-kbk').style.pointerEvents = 'all';
+  document.getElementById('p2-amount-input').style.opacity = '1';
+  document.getElementById('p2-amount-input').style.pointerEvents = 'all';
+
+  // Tax
+  p2.taxSel = true;
+  p2.taxTxt = d.taxTxt;
+  p2.taxCode = d.taxCode;
+  document.getElementById('p2-f-tax-text').textContent = d.taxTxt + ' (' + d.taxCode + ')';
+  document.getElementById('p2-f-tax-text').style.color = '#1A1A2E';
+  document.getElementById('p2-f-tax').className = 'field-val filled';
+  document.querySelectorAll('#p2-dd-tax .dd-item').forEach((item)=>{
+    const selected = item.textContent.includes(d.taxCode);
+    item.classList.toggle('active', selected);
+    item.querySelector('.dd-check').textContent = selected ? '✓' : '';
+  });
+
+  // KBK
+  const kbkList = KBK_MAP[d.taxCode] || [];
+  const ddKbk = document.getElementById('p2-dd-kbk');
+  ddKbk.innerHTML = kbkList.map(k=>
+    `<div class="dd-item" onclick="p2SelectKbk('${k.code}','${k.name}',this)"><span class="dd-check">${k.code === d.kbkCode ? '✓' : ''}</span><div><div>${k.name}</div><div class="dd-sub">КБК: ${k.code}</div></div></div>`
+  ).join('');
+  p2.kbkSel = true;
+  p2.kbkCode = d.kbkCode;
+  p2.kbkTxt = d.kbkTxt;
+  document.getElementById('p2-f-kbk-text').textContent = d.kbkCode + ' — ' + d.kbkTxt;
+  document.getElementById('p2-f-kbk-text').style.color = '#1A1A2E';
+  document.getElementById('p2-f-kbk').className = 'field-val filled';
+
+  // Amount
+  const remain = p2GetDebtRemain(debtKey);
+  p2.amountRaw = remain;
+  p2.targetDebtRaw = remain;
+  p2.amountValid = true;
+  document.getElementById('p2-amount-input').value = remain.toFixed(2);
+  document.getElementById('p2-amountError').style.display = 'none';
+
+  document.querySelectorAll('#p2-screens .dropdown-list').forEach((list)=>list.classList.remove('open'));
+  p2.accSel = null;
+  ['p2-form-acc1','p2-form-acc2'].forEach(id=>document.getElementById(id).className='account-card');
+  ['p2-form-r1','p2-form-r2'].forEach(id=>document.getElementById(id).className='radio-dot');
+  document.getElementById('p2-accFormError').style.display='none';
+  p2CheckForm();
+}
+
+function p2GoToAccounts(){
+  if(!p2.amountValid || !p2.accSel || p2.amountRaw > (p2.accounts[p2.accSel] || 0)) return;
+  const fmt = p2.amountRaw.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₸';
+  p2.amountFmt = fmt;
+  p2.paymentCode = 'PMT-' + Date.now().toString().slice(-8);
+  p2.transactionId = 'txn-' + Math.random().toString(36).slice(2,10).toUpperCase();
+  if (p2.targetDebtRaw === null) p2.targetDebtRaw = p2.amountRaw;
+  p2Navigate('paycode');
+  animatePaycode('p2', p2.paymentCode, ()=>{
+    const acc = p2.accSel===1 ? 'Расчётный счёт · KGZ ●●● 4821' : 'Сберегательный · KGZ ●●● 5512';
+    document.getElementById('p2-conf-amount').textContent   = fmt;
+    document.getElementById('p2-conf-taxname').textContent  = p2.taxTxt;
+    document.getElementById('p2-conf-taxname2').textContent = p2.taxTxt;
+    document.getElementById('p2-conf-kbk').textContent      = p2.kbkCode + ' — ' + p2.kbkTxt;
+    document.getElementById('p2-conf-rayon').textContent    = p2.rayonTxt;
+    document.getElementById('p2-conf-aimak').textContent    = p2.aimakTxt;
+    document.getElementById('p2-conf-acc').textContent      = acc;
+    document.getElementById('p2-conf-paycode').textContent  = p2.paymentCode;
+    document.getElementById('p2-conf-total').textContent    = fmt;
+    /* paycode — транзитный, back из confirm → form */
+    p2.history.pop();
+    p2.history.push('form');
+    p2Show('confirm');
+  });
+}
+
+function p2SelectAcc(n){
+  p2.accSel=n;
+  const insuf = p2.amountRaw > (p2.accounts[n] || 0);
+  ['p2-acc1','p2-acc2'].forEach((id,i)=>{
+    document.getElementById(id).className=i+1===n?(insuf?'account-card err':'account-card sel'):'account-card';
+    document.getElementById('p2-r'+(i+1)).className=i+1===n?(insuf?'radio-dot err':'radio-dot on'):'radio-dot';
+  });
+  document.getElementById('p2-accError').style.display=insuf?'block':'none';
+  document.getElementById('p2-btnAccNext').className=insuf?'btn-primary disabled':'btn-primary';
+}
+
+function p2GoToConfirm(){
+  if(!p2.accSel || p2.amountRaw > (p2.accounts[p2.accSel] || 0)) return;
+  const acc=p2.accSel===1?'Расчётный счёт · KGZ ●●● 4821':'Сберегательный · KGZ ●●● 5512';
+  document.getElementById('p2-conf-amount').textContent    = p2.amountFmt;
+  document.getElementById('p2-conf-taxname').textContent   = p2.taxTxt;
+  document.getElementById('p2-conf-taxname2').textContent  = p2.taxTxt;
+  document.getElementById('p2-conf-kbk').textContent       = p2.kbkCode + ' — ' + p2.kbkTxt;
+  document.getElementById('p2-conf-rayon').textContent     = p2.rayonTxt;
+  document.getElementById('p2-conf-aimak').textContent     = p2.aimakTxt;
+  document.getElementById('p2-conf-acc').textContent       = acc;
+  document.getElementById('p2-conf-paycode').textContent   = p2.paymentCode;
+  document.getElementById('p2-conf-total').textContent     = p2.amountFmt;
+  p2Navigate('confirm');
+}
+
+let _p2timer = null;
+
+function p2GoToProcessing(){
+  if (_p2timer) { clearTimeout(_p2timer); _p2timer = null; }
+  p2Navigate('processing');
+  const autoStatus = p2GetAutoStatus();
+  _p2timer = setTimeout(()=>p2ForceStatus(autoStatus), 1800);
+}
+
+function p2ForceStatus(statusCode) {
+  if (_p2timer) { clearTimeout(_p2timer); _p2timer = null; }
+  const now = new Date().toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const fmt = v => v.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₸';
+  const LABELS = {
+    2:'Статус 2 — Частично оплачено', 3:'Статус 3 — Оплачен',
+    4:'Статус 4 — Переплачено',       5:'Статус 5 — Просрочено',
+    6:'Статус 6 — Частичная оплата с задержкой',
+    7:'Статус 7 — Оплачено с задержкой',
+    8:'Статус 8 — Переплата с задержкой'
+  };
+  const label = LABELS[statusCode] || ('Статус ' + statusCode);
+
+  if (statusCode === 3 || statusCode === 7) {
+    p2ApplyStatusEffects(statusCode, p2.amountRaw);
+    const delayed = statusCode === 7;
+    document.getElementById('p2-res-title').textContent   = delayed ? 'Оплачено с задержкой' : 'Оплачено успешно';
+    document.getElementById('p2-res-sub').textContent     = delayed ? 'Платёж зарегистрирован, но позже установленного срока. Уточните пени в ГНС.' : 'Платёж зарегистрирован в ГНС';
+    document.getElementById('p2-res-badge').textContent   = label;
+    document.getElementById('p2-res-badge').className     = 'status-badge ' + (delayed ? 'delayed' : 'ok');
+    document.getElementById('p2-res-amount').textContent  = p2.amountFmt;
+    document.getElementById('p2-res-date').textContent    = now;
+    document.getElementById('p2-res-paycode').textContent = p2.paymentCode;
+    p2Navigate('success');
+
+  } else if (statusCode === 2 || statusCode === 6) {
+    const target = p2.targetDebtRaw || p2.amountRaw;
+    const paid   = Math.min(p2.amountRaw, target);
+    const remain = Math.max(0, roundMoney(target - paid));
+    p2ApplyStatusEffects(statusCode, paid);
+    p2.remainAmount = remain;
+    const delayed = statusCode === 6;
+    document.getElementById('p2-partial-title').textContent   = delayed ? 'Частично оплачено с просрочкой' : 'Оплачено частично';
+    document.getElementById('p2-partial-badge').textContent   = label;
+    document.getElementById('p2-partial-badge').className     = 'status-badge partial';
+    document.getElementById('p2-partial-paid').textContent    = fmt(paid);
+    document.getElementById('p2-partial-remain').textContent  = fmt(remain);
+    document.getElementById('p2-partial-date').textContent    = now;
+    document.getElementById('p2-partial-paycode').textContent = p2.paymentCode;
+    document.getElementById('p2-partial-alert').textContent   = delayed
+      ? '⚠️  Зачтено ' + fmt(paid) + ' с задержкой. Возможно начисление пеней.'
+      : '⚠️  Задолженность не погашена полностью. Рекомендуем доплатить остаток.';
+    p2Navigate('partial');
+
+  } else if (statusCode === 4 || statusCode === 8) {
+    const target = p2.targetDebtRaw || p2.amountRaw;
+    const extra = target > 0 ? Math.max(0, roundMoney(p2.amountRaw - target)) : null;
+    p2ApplyStatusEffects(statusCode, p2.amountRaw);
+    const delayed = statusCode === 8;
+    document.getElementById('p2-overpay-title').textContent   = delayed ? 'Переплата с задержкой' : 'Зафиксирована переплата';
+    document.getElementById('p2-overpay-sub').textContent     = delayed
+      ? 'Платёж зарегистрирован с задержкой. Переплата будет зачтена ГНС. Возможны пени.'
+      : 'Оплачено больше суммы обязательства. Переплата будет зачтена ГНС.';
+    document.getElementById('p2-overpay-badge').textContent   = label;
+    document.getElementById('p2-overpay-badge').className     = 'status-badge overpay';
+    document.getElementById('p2-overpay-paid').textContent    = p2.amountFmt;
+    document.getElementById('p2-overpay-extra').textContent   = extra === null ? 'Уточните в ГНС' : fmt(extra);
+    document.getElementById('p2-overpay-date').textContent    = now;
+    document.getElementById('p2-overpay-paycode').textContent = p2.paymentCode;
+    p2Navigate('overpay');
+
+  } else if (statusCode === 5) {
+    document.getElementById('p2-overdue-amount').textContent  = p2.amountFmt;
+    document.getElementById('p2-overdue-date').textContent    = now;
+    document.getElementById('p2-overdue-paycode').textContent = p2.paymentCode;
+    p2Navigate('overdue');
+  }
+}
+
+function p2PayRemainder() {
+  const remain = p2.remainAmount > 0 ? p2.remainAmount : p2.amountRaw;
+  p2.amountRaw  = remain;
+  p2.amountFmt  = remain.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₸';
+  p2.amountValid = remain > 0;
+  p2.targetDebtRaw = remain;
+  p2.accSel = null;
+
+  const amtInput = document.getElementById('p2-amount-input');
+  amtInput.value = remain.toFixed(2);
+  amtInput.style.opacity = '1';
+  amtInput.style.pointerEvents = 'all';
+  document.getElementById('p2-amountError').style.display = 'none';
+  document.getElementById('p2-accFormError').style.display = 'none';
+  ['p2-form-acc1','p2-form-acc2'].forEach(id => document.getElementById(id).className = 'account-card');
+  ['p2-form-r1', 'p2-form-r2'].forEach(id => document.getElementById(id).className = 'radio-dot');
+  document.getElementById('p2-btnFormNext').className = 'btn-primary disabled';
+
+  p2.history = [];
+  p2Show('form');
+}
+
+function p2Reset(){
+  p2.history=[]; p2.rayonSel=false; p2.aimakSel=false; p2.taxSel=false;
+  p2.kbkSel=false; p2.amountValid=false; p2.accSel=null; p2.remainAmount=0; p2.targetDebtRaw=null; p2.debtKey='';
+  // Reset form visuals
+  document.getElementById('p2-f-rayon-text').textContent='Выберите район';
+  document.getElementById('p2-f-rayon-text').style.color='#9CA3AF';
+  document.getElementById('p2-f-rayon').className='field-val';
+  document.getElementById('p2-aimakGroup').style.display='none';
+  document.getElementById('p2-f-tax-text').textContent='Выберите налог';
+  document.getElementById('p2-f-tax').style.opacity='0.4'; document.getElementById('p2-f-tax').style.pointerEvents='none';
+  document.getElementById('p2-f-kbk-text').textContent='Выберите КБК';
+  document.getElementById('p2-f-kbk').style.opacity='0.4'; document.getElementById('p2-f-kbk').style.pointerEvents='none';
+  document.getElementById('p2-amount-input').value='';
+  document.getElementById('p2-amount-input').style.opacity='0.4'; document.getElementById('p2-amount-input').style.pointerEvents='none';
+  ['p2-form-acc1','p2-form-acc2'].forEach(id=>document.getElementById(id).className='account-card');
+  ['p2-form-r1','p2-form-r2'].forEach(id=>document.getElementById(id).className='radio-dot');
+  document.getElementById('p2-accFormError').style.display='none';
+  document.getElementById('p2-btnFormNext').className='btn-primary disabled';
+  p2UpdateAccountBalances();
+  p2RenderAllDebtCards();
+  p2Show('home');
+}
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#p2-screens .dropdown-wrap'))
+    document.querySelectorAll('#p2-screens .dropdown-list').forEach(d=>d.classList.remove('open'));
+});
+
+  p2UpdateAccountBalances();
+  p2RenderAllDebtCards();
+
+/* ══════════════════════════════════════════════════════
+   SHARED — Paycode animation
+══════════════════════════════════════════════════════ */
+function animatePaycode(prefix, code, onDone) {
+  // Reset all steps
+  [1,2,3].forEach(n=>{
+    const step = document.getElementById(prefix+'-ps'+n);
+    const icon = document.getElementById(prefix+'-ps'+n+'-icon');
+    step.classList.remove('active','done');
+    icon.className = 'ps-icon wait';
+    icon.innerHTML = n===1?'<span>📋</span>':n===2?'<span>🔗</span>':'<span>✅</span>';
+  });
+  const result = document.getElementById(prefix+'-paycode-result');
+  result.style.display = 'none';
+
+  // Step 1: instantly active → done
+  const s1 = document.getElementById(prefix+'-ps1');
+  const i1 = document.getElementById(prefix+'-ps1-icon');
+  s1.classList.add('active');
+  i1.className = 'ps-icon spin';
+  i1.innerHTML = '<div class="mini-spin"></div>';
+
+  setTimeout(()=>{
+    s1.classList.remove('active'); s1.classList.add('done');
+    i1.className = 'ps-icon ok'; i1.innerHTML = '<span>✓</span>';
+
+    // Step 2: active (network call)
+    const s2 = document.getElementById(prefix+'-ps2');
+    const i2 = document.getElementById(prefix+'-ps2-icon');
+    s2.classList.add('active');
+    i2.className = 'ps-icon spin'; i2.innerHTML = '<div class="mini-spin"></div>';
+
+    setTimeout(()=>{
+      s2.classList.remove('active'); s2.classList.add('done');
+      i2.className = 'ps-icon ok'; i2.innerHTML = '<span>✓</span>';
+
+      // Step 3: code received
+      const s3 = document.getElementById(prefix+'-ps3');
+      const i3 = document.getElementById(prefix+'-ps3-icon');
+      s3.classList.add('active','done');
+      i3.className = 'ps-icon ok'; i3.innerHTML = '<span>✓</span>';
+
+      // Show code card
+      document.getElementById(prefix+'-pr-code').textContent = code;
+      result.style.display = 'block';
+      result.style.opacity = '0';
+      result.style.transform = 'translateY(12px)';
+      result.style.transition = 'opacity 0.4s, transform 0.4s';
+      requestAnimationFrame(()=>{ result.style.opacity='1'; result.style.transform='translateY(0)'; });
+
+      // Auto-advance after showing code
+      setTimeout(onDone, 1200);
+    }, 900);
+  }, 500);
+}
+</script>
+</body>
+</html>
